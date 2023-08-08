@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "243314076996",
+    "project_id": "monitoring-hospital",
+    "storage_bucket": "monitoring-hospital.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243314076996:android:1893c05f3bca003da17b11",
+        "android_client_info": {
+          "package_name": "com.robbyari.monitoring"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "243314076996-6ebhujleuiqvu0416jnvhlf9ol2qqf5e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNbRQ8n5uwKt07V4qHyG8WKSnlMm80dpw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "243314076996-6ebhujleuiqvu0416jnvhlf9ol2qqf5e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
