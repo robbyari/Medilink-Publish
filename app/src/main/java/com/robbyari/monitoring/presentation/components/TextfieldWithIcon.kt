@@ -1,16 +1,24 @@
 package com.robbyari.monitoring.presentation.components
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.robbyari.monitoring.presentation.theme.Blue
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,9 +30,13 @@ fun TextFieldWithIcons(
     trailingIcon: ImageVector? = null,
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier.clip(RoundedCornerShape(20.dp))
+    isPasswordVisible: Boolean = false,
+    modifier: Modifier
 ) {
-    return OutlinedTextField(
+    var isPasswordVisible by remember { mutableStateOf(isPasswordVisible) }
+    var passwordIcon by remember { mutableStateOf(trailingIcon) }
+
+    OutlinedTextField(
         value = value,
         leadingIcon = {
             Icon(
@@ -32,9 +44,17 @@ fun TextFieldWithIcons(
                 contentDescription = "Icon Text field"
             )
         },
+        visualTransformation = if (isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         trailingIcon = {
             if (trailingIcon != null) {
-                Icon(imageVector = trailingIcon, contentDescription = "Icon Trailing")
+                passwordIcon = if (isPasswordVisible) Icons.Outlined.VisibilityOff else Icons.Default.Visibility
+                IconButton(
+                    onClick = {
+                        isPasswordVisible = !isPasswordVisible
+                    },
+                ) {
+                    passwordIcon?.let { Icon(imageVector = it, contentDescription = "Icon Trailing") }
+                }
             }
         },
         onValueChange = onValueChange,
@@ -47,6 +67,6 @@ fun TextFieldWithIcons(
             cursorColor = Blue,
             focusedLabelColor = Blue
         ),
-        singleLine = true
+        singleLine = true,
     )
 }

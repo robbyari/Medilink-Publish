@@ -8,3 +8,4 @@ val Orange = Color(0xFFEF8833)
 val Green = Color(0xFF2FA409)
 
 val Blue = Color(0xFF1375DF)
+val LightBlue = Color(0xFFEEF3FA)

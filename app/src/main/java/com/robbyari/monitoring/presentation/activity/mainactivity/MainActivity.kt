@@ -1,4 +1,4 @@
-package com.robbyari.monitoring
+package com.robbyari.monitoring.presentation.activity.mainactivity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,11 +12,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
             MonitoringTheme {
-                MonitoringApp()
+                MainApp()
             }
         }
+    }
+
+    override fun onBackPressed() {
+        moveTaskToBack(true)
     }
 }
 

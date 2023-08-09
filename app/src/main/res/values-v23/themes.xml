@@ -5,9 +5,4 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
-
-    <style name="SplashScreenTheme" parent="Theme.Monitoring">
-        <item name="android:windowBackground">@drawable/bg_splash</item>
-    </style>
-
 </resources>
