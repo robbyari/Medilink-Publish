@@ -26,11 +26,11 @@ fun MainApp(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+
     Scaffold(
-        bottomBar = { },
         modifier = modifier,
         containerColor = Color.Transparent,
-        contentWindowInsets = WindowInsets(top = 0.dp)
+        contentWindowInsets = WindowInsets(top = 0.dp),
     ) { innerPadding ->
         NavHost(
             navController = navController,

@@ -14,7 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.robbyari.monitoring.domain.model.User
+import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 
 @Composable
@@ -80,11 +81,12 @@ fun HomeActionBar(
         }
         Spacer(modifier = Modifier.weight(1f))
         Icon(
-            Icons.Outlined.Notifications,
+            Icons.Filled.QrCodeScanner,
             contentDescription = "Photo Profil",
-            tint = Color.LightGray,
+            tint = Color.White,
             modifier = Modifier
                 .size(48.dp)
+                .background(Blue, shape = RoundedCornerShape(20))
                 .border(2.dp, color = Color.LightGray, shape = RoundedCornerShape(20))
                 .padding(8.dp)
         )

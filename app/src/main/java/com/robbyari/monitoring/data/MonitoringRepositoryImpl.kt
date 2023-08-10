@@ -6,14 +6,19 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.firebase.firestore.FirebaseFirestore
+import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.domain.repository.MonitoringRepository
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.io.IOException
+import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -87,6 +92,39 @@ class MonitoringRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             throw e
+        }
+    }
+
+    override suspend fun getDailyCheck(): Flow<Response<List<Alat>>> = callbackFlow {
+        val currentDate = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+
+        val query = db.collection("Alat")
+            .whereEqualTo("cekHarian", true)
+            .whereLessThan("pengecekanHarian", currentDate)
+
+        val listener = query.addSnapshotListener { querySnapshot, exception ->
+            if (exception != null) {
+                trySend(Response.Failure(exception))
+                return@addSnapshotListener
+            }
+
+            val dailyCheckList = mutableListOf<Alat>()
+            for (document in querySnapshot!!.documents) {
+                val alat = document.toObject(Alat::class.java)
+                alat?.let { dailyCheckList.add(it) }
+            }
+
+            trySend(Response.Success(dailyCheckList))
+        }
+
+        awaitClose {
+            listener.remove()
         }
     }
 
