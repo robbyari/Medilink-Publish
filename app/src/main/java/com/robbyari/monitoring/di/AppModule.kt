@@ -1,5 +1,6 @@
 package com.robbyari.monitoring.di
 
+import android.app.Application
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -21,10 +22,14 @@ val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name =
 class AppModule {
 
     @Provides
-    fun provideMonitoringRepository(userDataStorePreferences: DataStore<Preferences>): MonitoringRepository = MonitoringRepositoryImpl(
+    fun provideMonitoringRepository(userDataStorePreferences: DataStore<Preferences>, context: Context): MonitoringRepository = MonitoringRepositoryImpl(
         db = Firebase.firestore,
-        userDataStorePreferences = userDataStorePreferences
+        userDataStorePreferences = userDataStorePreferences,
+        context = context
     )
+
+    @Provides
+    fun provideContext(application: Application): Context = application.applicationContext
 
     companion object {
         @Provides

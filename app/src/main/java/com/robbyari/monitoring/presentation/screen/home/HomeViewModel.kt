@@ -27,6 +27,9 @@ class HomeViewModel @Inject constructor(
     private val _dailyCheck = MutableStateFlow<Response<List<Alat>>>(Response.Loading)
     val dailyCheck: StateFlow<Response<List<Alat>>> = _dailyCheck
 
+    private val _barcodeResult = MutableStateFlow<Response<String>>(Response.Loading)
+    val barcodeResult: StateFlow<Response<String>> = _barcodeResult
+
     init {
         viewModelScope.launch {
             getEmail()
@@ -55,6 +58,16 @@ class HomeViewModel @Inject constructor(
             }
         } catch (e: Exception) {
             _dailyCheck.emit(Response.Failure(e))
+        }
+    }
+
+    suspend fun startScan() {
+        try {
+            repo.getBarcodeText().collectLatest {
+                _barcodeResult.emit(it)
+            }
+        } catch (e: Exception) {
+            _barcodeResult.emit(Response.Failure(e))
         }
     }
 

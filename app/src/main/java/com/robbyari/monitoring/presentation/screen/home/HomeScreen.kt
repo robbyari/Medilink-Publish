@@ -1,5 +1,8 @@
 package com.robbyari.monitoring.presentation.screen.home
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,9 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,13 +43,31 @@ import com.robbyari.monitoring.presentation.components.TitleBar
 import com.robbyari.monitoring.presentation.theme.LightBlue
 import com.robbyari.monitoring.utils.BottomShadow
 import com.robbyari.monitoring.utils.convertFirebaseTimestampToString
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    navigateToDayChecking: (String) -> Unit
 ) {
     val emailState by viewModel.email.collectAsState()
     val user by viewModel.user.collectAsState()
+
+    val context = LocalContext.current
+
+    val barcodeResult: Response<String> by viewModel.barcodeResult.collectAsState()
+
+    LaunchedEffect(barcodeResult) {
+        when (barcodeResult) {
+            is Response.Success -> {
+                val scannedValue = (barcodeResult as Response.Success<String>).data
+                if (scannedValue != null) {
+                    navigateToDayChecking(scannedValue)
+                }
+            }
+            else -> {}
+        }
+    }
 
     LaunchedEffect(emailState) {
         viewModel.getUser(emailState)
@@ -59,7 +82,7 @@ fun HomeScreen(
             is Response.Success -> {
                 val data = (user as Response.Success<User>).data
                 if (data != null) {
-                    HomeContent(user = data)
+                    HomeContent(user = data, context = context)
                 }
 
             }
@@ -72,9 +95,11 @@ fun HomeScreen(
 @Composable
 fun HomeContent(
     user: User,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    context: Context
 ) {
 
+    val coroutineScope = rememberCoroutineScope()
     val dailyCheck: Response<List<Alat>> by viewModel.dailyCheck.collectAsState()
 
     Column {
@@ -89,7 +114,7 @@ fun HomeContent(
                 .verticalScroll(rememberScrollState())
                 .weight(1f, false)
         ) {
-            Spacer(modifier = Modifier.height(11.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             LazyRow(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -148,7 +173,13 @@ fun HomeContent(
                                 title = alat.namaAlat!!,
                                 noSeri = alat.noSeri!!,
                                 unit = alat.unit!!,
-                                date = convertFirebaseTimestampToString(alat.pengecekanHarian!!)
+                                date = convertFirebaseTimestampToString(alat.pengecekanHarian!!),
+                                isScanDay = true,
+                                onScanDay = {
+                                    coroutineScope.launch {
+                                        viewModel.startScan()
+                                    }
+                                }
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                         }
@@ -168,10 +199,15 @@ fun HomeContent(
                 item {
                     ItemContent(
                         model = "https://upload.wikimedia.org/wikipedia/commons/1/10/Hospital_Patient_Monitor_%2817239884329%29.jpg",
-                        title = "Patient Monitor",
-                        noSeri = "RY/23/2023",
+                        title = "Patient Monitor Patient Monitor Patient Monitor",
+                        noSeri = "RY/23/2023 RY/23/2023 RY/23/2023",
                         unit = "Flamboyan",
-                        date = "Agustus 2023"
+                        date = "Agustus 2023",
+                        isScanMonth = true,
+                        onScanMonth = {
+                            Toast.makeText(context, "Bulanan", Toast.LENGTH_SHORT).show()
+                            Log.d("Klik Scan", "Bulanan")
+                        }
                     )
                 }
             }
@@ -190,7 +226,12 @@ fun HomeContent(
                         title = "Patient Monitor",
                         noSeri = "RY/23/2023",
                         unit = "Flamboyan",
-                        date = "Agustus 2023"
+                        date = "Agustus 2023",
+                        isScanCalibration = true,
+                        onScanCalibration = {
+                            Toast.makeText(context, "Calibration", Toast.LENGTH_SHORT).show()
+                            Log.d("Klik Scan", "Calibration")
+                        }
                     )
                 }
             }

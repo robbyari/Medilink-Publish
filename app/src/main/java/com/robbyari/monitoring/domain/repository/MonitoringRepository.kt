@@ -11,4 +11,5 @@ interface MonitoringRepository {
     suspend fun getEmail(): String
     suspend fun getUser(email: String): User
     suspend fun getDailyCheck(): Flow<Response<List<Alat>>>
+    suspend fun getBarcodeText(): Flow<Response<String>>
 }

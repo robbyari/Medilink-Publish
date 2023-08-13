@@ -10,11 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.robbyari.monitoring.presentation.navigation.Screen
+import com.robbyari.monitoring.presentation.screen.daychecking.DayCheckingScreen
 import com.robbyari.monitoring.presentation.screen.home.HomeScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +41,18 @@ fun MainApp(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
-                HomeScreen()
+                HomeScreen(
+                    navigateToDayChecking = { id ->
+                        navController.navigate(Screen.DayChecking.createRoute(id))
+                    }
+                )
+            }
+            composable(
+                route = Screen.DayChecking.route,
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) {
+                val id = it.arguments?.getString("id") ?: ""
+                DayCheckingScreen(id = id)
             }
         }
     }
