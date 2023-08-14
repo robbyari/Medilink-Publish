@@ -1,6 +1,7 @@
 package com.robbyari.monitoring.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -147,6 +148,25 @@ class MonitoringRepositoryImpl @Inject constructor(
             val barcodeValue = scanner.startScan().await()
             emit(Response.Success(barcodeValue.rawValue))
         } catch (e: Exception) {
+            emit(Response.Failure(e))
+        }
+    }
+
+    override suspend fun getDetailAlat(id: String): Flow<Response<Alat>> = flow {
+        emit(Response.Loading)
+        try {
+            val getDetail = db.collection("Alat").document(id).get().await()
+            val detail = getDetail.toObject(Alat::class.java)
+
+            if (detail != null) {
+                emit(Response.Success(detail))
+            } else {
+                Log.d("Gagal", "Data kosong")
+                emit(Response.Failure(Exception("Data tidak ada")))
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
             emit(Response.Failure(e))
         }
     }

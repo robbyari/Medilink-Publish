@@ -18,5 +18,6 @@ data class Alat(
     val unit: String? = "",
     val cekHarian: Boolean? = false,
     val cekBulanan: Boolean? = false,
-    val cekKalibrasi: Boolean? = false
+    val cekKalibrasi: Boolean? = false,
+    val terakhirDicekOleh: String? = ""
 )

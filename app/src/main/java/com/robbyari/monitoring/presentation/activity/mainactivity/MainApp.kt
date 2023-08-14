@@ -37,7 +37,7 @@ fun MainApp(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.DayChecking.createRoute("Cu62hgGla4hnYES"),
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
@@ -52,7 +52,16 @@ fun MainApp(
                 arguments = listOf(navArgument("id") { type = NavType.StringType })
             ) {
                 val id = it.arguments?.getString("id") ?: ""
-                DayCheckingScreen(id = id)
+                DayCheckingScreen(
+                    id = id,
+                    backHandler = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
             }
         }
     }
