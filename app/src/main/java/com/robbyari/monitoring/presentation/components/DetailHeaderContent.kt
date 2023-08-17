@@ -1,14 +1,12 @@
 package com.robbyari.monitoring.presentation.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
@@ -34,9 +32,8 @@ fun DetailHeaderContent(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .padding(top = 65.dp)
+            .fillMaxWidth()
+            .padding(top = 15.dp)
 
     ) {
         Row(
@@ -45,7 +42,7 @@ fun DetailHeaderContent(
         ) {
             AsyncImage(
                 model = data.photoUrl,
-                contentDescription = "Total Alat",
+                contentDescription = "Photo Alat",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(65.dp)
@@ -68,7 +65,7 @@ fun DetailHeaderContent(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(200.dp)
+                    modifier = Modifier.width(280.dp)
                 )
                 Text(
                     text = data.unit!!,
@@ -80,54 +77,48 @@ fun DetailHeaderContent(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(6.dp))
-        Row(
-            modifier = Modifier
-                .width(450.dp)
-                .padding(start = 16.dp, end = 16.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Text(
-                text = "Terakhir Dicek: ",
-                fontSize = 16.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Start,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = "${convertFirebaseTimestampToString(data.pengecekanHarian!!)}",
-                fontSize = 16.sp,
-                color = Color.Black,
-                textAlign = TextAlign.Start,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        Row(
-            modifier = Modifier
-                .width(450.dp)
-                .padding(start = 16.dp, end = 16.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Text(
-                text = "Petugas terakhir: ",
-                fontSize = 16.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Start,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = data.terakhirDicekOleh!!,
-                fontSize = 16.sp,
-                color = Color.Black,
-                textAlign = TextAlign.Start,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(Modifier.fillMaxWidth()) {
+            Column (modifier = Modifier.weight(0.5f).padding(start = 16.dp)) {
+                Text(
+                    text = "Petugas terakhir : ",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Start,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = data.terakhirDicekOleh!!,
+                    fontSize = 16.sp,
+                    color = Color.Black,
+                    textAlign = TextAlign.Start,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+            }
+            Column(modifier = Modifier.weight(0.5f).padding(end = 16.dp)) {
+                Text(
+                    text = "Terakhir dicek : ",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Start,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "${convertFirebaseTimestampToString(data.pengecekanHarian!!)}",
+                    fontSize = 16.sp,
+                    color = Color.Black,
+                    textAlign = TextAlign.Start,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Divider()
+        Divider(Modifier, 2.dp, color = Color.LightGray)
     }
 }

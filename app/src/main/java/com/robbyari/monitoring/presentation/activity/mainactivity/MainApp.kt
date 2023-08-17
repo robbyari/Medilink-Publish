@@ -23,7 +23,9 @@ import com.robbyari.monitoring.presentation.screen.home.HomeScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainApp(
+    location: String?,
     modifier: Modifier = Modifier,
+    isDistanceGreaterThan100Meters: Boolean,
     navController: NavHostController = rememberNavController(),
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -54,6 +56,8 @@ fun MainApp(
                 val id = it.arguments?.getString("id") ?: ""
                 DayCheckingScreen(
                     id = id,
+                    location = location,
+                    isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
                     backHandler = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Home.route) {

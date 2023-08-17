@@ -75,6 +75,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
+    implementation("com.google.firebase:firebase-storage-ktx:20.2.1")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation ("androidx.compose.material:material-icons-extended:1.4.3")
@@ -86,4 +87,8 @@ dependencies {
 
     implementation ("com.google.android.gms:play-services-code-scanner:16.1.0")
     implementation ("com.google.mlkit:barcode-scanning:17.2.0")
+
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+    implementation ("androidx.exifinterface:exifinterface:1.3.6")
+    implementation ("com.google.accompanist:accompanist-permissions:0.23.1")
 }
