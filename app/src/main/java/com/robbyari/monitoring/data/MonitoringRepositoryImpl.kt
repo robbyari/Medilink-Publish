@@ -1,6 +1,7 @@
 package com.robbyari.monitoring.data
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -8,6 +9,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
@@ -30,6 +32,7 @@ import javax.inject.Singleton
 
 @Singleton
 class MonitoringRepositoryImpl @Inject constructor(
+    private val storage: FirebaseStorage,
     private val db: FirebaseFirestore,
     private val userDataStorePreferences: DataStore<Preferences>,
     context: Context,
@@ -168,6 +171,23 @@ class MonitoringRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Response.Failure(e))
+        }
+    }
+
+    override suspend fun addImageToFirebaseStorage(imageUri: Uri): Response<Uri> {
+        return try {
+            val timestamp = System.currentTimeMillis()
+            val uniqueFilename = "image_$timestamp.jpg"
+
+            val storageReference = storage.reference.child("Images").child("Bukti Pengecekan").child(uniqueFilename)
+            storageReference.putFile(imageUri).await()
+
+            val downloadUrl = storageReference.downloadUrl.await()
+
+            Log.d("Download Url", downloadUrl.toString())
+            Response.Success(downloadUrl)
+        } catch (e: Exception) {
+            Response.Failure(e)
         }
     }
 

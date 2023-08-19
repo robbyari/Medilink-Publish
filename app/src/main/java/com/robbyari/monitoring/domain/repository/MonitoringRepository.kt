@@ -1,5 +1,6 @@
 package com.robbyari.monitoring.domain.repository
 
+import android.net.Uri
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.domain.model.User
@@ -13,4 +14,5 @@ interface MonitoringRepository {
     suspend fun getDailyCheck(): Flow<Response<List<Alat>>>
     suspend fun getBarcodeText(): Flow<Response<String>>
     suspend fun getDetailAlat(id: String): Flow<Response<Alat>>
+    suspend fun addImageToFirebaseStorage(imageUri: Uri): Response<Uri>
 }

@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,8 +48,15 @@ fun BodyContentChecking(
     capturedImageUri: Boolean = false,
     painter: Painter = painterResource(id = R.drawable.logoprikasih),
     location: String? = "",
-    time: String? = ""
+    time: String? = "",
+    listCek: List<String>? = emptyList()
 ) {
+    val checkedItems = remember { mutableStateMapOf<String, Boolean>() }
+
+    val checkedItemCount = checkedItems.count{it.value}
+    val totalItemCount = listCek?.size ?: 0
+    val progressPercentage = if (totalItemCount > 0) (checkedItemCount * 100) / totalItemCount else 0
+
     Column(
         modifier = Modifier
             .background(LightBlue)
@@ -113,7 +122,41 @@ fun BodyContentChecking(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(end = 16.dp)
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Pengecekan : ",
+            fontSize = 16.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Start,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Column {
+            listCek?.forEach { item ->
+                CheckboxItem(
+                    item = item,
+                    isChecked = checkedItems[item] ?: false,
+                    onCheckedChange = { isChecked ->
+                        checkedItems[item] = isChecked
+                    }
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        LinearProgressIndicator(
+            progress = progressPercentage / 100f,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "$checkedItemCount/$totalItemCount Selesai",
+            fontSize = 16.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(7))
@@ -170,7 +213,7 @@ fun BodyContentChecking(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         TextFieldNote()
     }
 

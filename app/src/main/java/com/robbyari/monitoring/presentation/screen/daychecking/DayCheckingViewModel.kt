@@ -1,5 +1,9 @@
 package com.robbyari.monitoring.presentation.screen.daychecking
 
+import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robbyari.monitoring.domain.model.Alat
@@ -19,11 +23,20 @@ class DayCheckingViewModel @Inject constructor(
     private val _detail = MutableStateFlow<Response<Alat>>(Response.Loading)
     val detail: StateFlow<Response<Alat>> = _detail
 
+    var addImageToStorageResponse by mutableStateOf<Response<Uri>>(Response.Success(null))
+        private set
+
     private val idMock = "Nu62hgGla4hD6qz"
+
     init {
         viewModelScope.launch {
             getDetail(idMock)
         }
+    }
+
+    fun addImageToStorage(imageUri: Uri) = viewModelScope.launch {
+        addImageToStorageResponse = Response.Loading
+        addImageToStorageResponse = repo.addImageToFirebaseStorage(imageUri)
     }
 
     private suspend fun getDetail(id: String) {

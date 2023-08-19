@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.robbyari.monitoring.data.MonitoringRepositoryImpl
 import com.robbyari.monitoring.domain.repository.MonitoringRepository
 import dagger.Module
@@ -23,6 +24,7 @@ class AppModule {
 
     @Provides
     fun provideMonitoringRepository(userDataStorePreferences: DataStore<Preferences>, context: Context): MonitoringRepository = MonitoringRepositoryImpl(
+        storage = Firebase.storage,
         db = Firebase.firestore,
         userDataStorePreferences = userDataStorePreferences,
         context = context

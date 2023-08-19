@@ -19,5 +19,6 @@ data class Alat(
     val cekHarian: Boolean? = false,
     val cekBulanan: Boolean? = false,
     val cekKalibrasi: Boolean? = false,
-    val terakhirDicekOleh: String? = ""
+    val terakhirDicekOleh: String? = "",
+    val listCek: List<String>? = emptyList()
 )
