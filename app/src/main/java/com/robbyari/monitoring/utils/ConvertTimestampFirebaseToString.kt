@@ -1,5 +1,6 @@
 package com.robbyari.monitoring.utils
 
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -13,4 +14,12 @@ fun convertFirebaseTimestampToString(timestamp: com.google.firebase.Timestamp): 
     val dateFormatter = SimpleDateFormat("dd MMM yyyy - HH:mm", Locale("id", "ID"))
 
     return dateFormatter.format(calendar.time)
+}
+
+fun convertStringToFirebaseTimestamp(dateTimeString: String): Timestamp {
+    val pattern = "dd MMM yyyy - HH:mm"
+    val dateFormat = SimpleDateFormat(pattern, Locale.getDefault())
+    val date = dateFormat.parse(dateTimeString)
+    val timestamp = date?.time ?: 0
+    return Timestamp(timestamp / 1000, ((timestamp % 1000) * 1000).toInt())
 }

@@ -8,5 +8,6 @@ data class User(
     val password: String? = "",
     val photoUrl: String? = "",
     val role: String? = "",
+    val divisi: String? = "",
     val status: Boolean? = false
 )

@@ -9,7 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.lifecycleScope
-import com.robbyari.monitoring.data.MonitoringRepositoryImpl.Companion.KEY_NAME
+import com.robbyari.monitoring.data.MonitoringRepositoryImpl.Companion.KEY_EMAIL
 import com.robbyari.monitoring.di.userDataStore
 import com.robbyari.monitoring.presentation.activity.loginactivity.LoginActivity
 import com.robbyari.monitoring.presentation.activity.mainactivity.MainActivity
@@ -33,7 +33,7 @@ class SplashActivity : ComponentActivity() {
             val dataStore: DataStore<Preferences> = applicationContext.userDataStore
             val dataStoreValue = dataStore.data.first()
 
-            val intent = if (dataStoreValue[KEY_NAME] != null) {
+            val intent = if (dataStoreValue[KEY_EMAIL] != null) {
                 Intent(this@SplashActivity, MainActivity::class.java)
             } else {
                 Intent(this@SplashActivity, LoginActivity::class.java)

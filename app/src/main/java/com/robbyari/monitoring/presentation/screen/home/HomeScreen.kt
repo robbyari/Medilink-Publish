@@ -1,8 +1,6 @@
 package com.robbyari.monitoring.presentation.screen.home
 
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,9 +50,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     navigateToDayChecking: (String) -> Unit
 ) {
-    val emailState by viewModel.email.collectAsState()
-    val user by viewModel.user.collectAsState()
-
+    val userDataStore by viewModel.userDataStore.collectAsState()
     val context = LocalContext.current
 
     val barcodeResult: Response<String> by viewModel.barcodeResult.collectAsState()
@@ -65,46 +63,49 @@ fun HomeScreen(
                     navigateToDayChecking(scannedValue)
                 }
             }
+
             else -> {}
         }
-    }
-
-    LaunchedEffect(emailState) {
-        viewModel.getUser(emailState)
     }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        when (user) {
-            is Response.Loading -> {}
-            is Response.Success -> {
-                val data = (user as Response.Success<User>).data
-                if (data != null) {
-                    HomeContent(user = data, context = context)
-                }
-
-            }
-
-            is Response.Failure -> {}
-        }
+        HomeContent(nameDataStore = "${userDataStore.firstName} ${userDataStore.lastName}", user = userDataStore)
     }
 }
 
 @Composable
 fun HomeContent(
+    nameDataStore: String,
     user: User,
     viewModel: HomeViewModel = hiltViewModel(),
-    context: Context
 ) {
 
     val coroutineScope = rememberCoroutineScope()
-    val dailyCheck: Response<List<Alat>> by viewModel.dailyCheck.collectAsState()
+    val dailyCheck by viewModel.dailyCheck.collectAsState()
+    val dailyCheckCount = remember { mutableStateOf(0) }
+    val monthlyCheck by viewModel.monthlyCheck.collectAsState()
+    val monthlyCheckCount = remember { mutableStateOf(0) }
+    val kalibrasiCheck by viewModel.kalibrasiCheck.collectAsState()
+    val kalibrasiCheckCount = remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchDailyCheck()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchMonthlyCheck()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchKalibrasiCheck()
+    }
 
     Column {
         Spacer(modifier = Modifier.height(38.dp))
-        HomeActionBar(user = user)
+        HomeActionBar(nameDataStore = nameDataStore, user = user)
         Spacer(modifier = Modifier.height(16.dp))
         BottomShadow()
         Column(
@@ -130,15 +131,15 @@ fun HomeContent(
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.WorkHistory, title = "Pengecekan Harian", total = 7)
+                    CardContent(icon = Icons.Filled.WorkHistory, title = "Pengecekan Harian", total = dailyCheckCount.value)
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.WorkHistory, title = "Pemeliharaan Bulanan", total = 2)
+                    CardContent(icon = Icons.Filled.WorkHistory, title = "Pemeliharaan Bulanan", total = monthlyCheckCount.value)
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.WorkHistory, title = "Kalibrasi Alat", total = 0)
+                    CardContent(icon = Icons.Filled.WorkHistory, title = "Kalibrasi Alat", total = kalibrasiCheckCount.value)
                     Spacer(modifier = Modifier.width(16.dp))
                 }
             }
@@ -160,13 +161,28 @@ fun HomeContent(
                 is Response.Loading -> {}
                 is Response.Success -> {
                     val data = (dailyCheck as Response.Success<List<Alat>>).data
+                    dailyCheckCount.value = data?.size ?: 0
+
+                    if (data.isNullOrEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp)
+                                .fillMaxWidth()
+                                .height(130.dp)
+                                .background(Color.White, shape = RoundedCornerShape(9)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
+                        }
+                    }
+
                     LazyRow(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         item {
                             Spacer(modifier = Modifier.width(16.dp))
                         }
-                        items(data!!.size) {index ->
+                        items(data!!.size) { index ->
                             val alat = data[index]
                             ItemContent(
                                 model = alat.photoUrl!!,
@@ -185,57 +201,110 @@ fun HomeContent(
                         }
                     }
                 }
+
                 is Response.Failure -> {}
             }
             Spacer(modifier = Modifier.height(16.dp))
             TitleBar(title = "Pemeliharaan Bulanan", detail = "Semua")
             Spacer(modifier = Modifier.height(16.dp))
-            LazyRow(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                item {
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
-                item {
-                    ItemContent(
-                        model = "https://upload.wikimedia.org/wikipedia/commons/1/10/Hospital_Patient_Monitor_%2817239884329%29.jpg",
-                        title = "Patient Monitor Patient Monitor Patient Monitor",
-                        noSeri = "RY/23/2023 RY/23/2023 RY/23/2023",
-                        unit = "Flamboyan",
-                        date = "Agustus 2023",
-                        isScanMonth = true,
-                        onScanMonth = {
-                            Toast.makeText(context, "Bulanan", Toast.LENGTH_SHORT).show()
-                            Log.d("Klik Scan", "Bulanan")
+            when (monthlyCheck) {
+                is Response.Loading -> {Log.d("Cek Bulanan", "Loading")}
+                is Response.Success -> {
+                    val data = (monthlyCheck as Response.Success<List<Alat>>).data
+                    monthlyCheckCount.value = data?.size ?: 0
+
+                    if (data.isNullOrEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp)
+                                .fillMaxWidth()
+                                .height(130.dp)
+                                .background(Color.White, shape = RoundedCornerShape(9)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
                         }
-                    )
+                    }
+
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                        items(data!!.size) { index ->
+                            val alat = data[index]
+                            ItemContent(
+                                model = alat.photoUrl!!,
+                                title = alat.namaAlat!!,
+                                noSeri = alat.noSeri!!,
+                                unit = alat.unit!!,
+                                date = convertFirebaseTimestampToString(alat.pengecekanHarian!!),
+                                isScanDay = true,
+                                onScanDay = {
+                                    coroutineScope.launch {
+                                        viewModel.startScan()
+                                    }
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                    }
                 }
+
+                is Response.Failure -> {Log.d("Cek Bulanan", "Failure")}
             }
             Spacer(modifier = Modifier.height(16.dp))
             TitleBar(title = "Kalibrasi Alat", detail = "Semua")
             Spacer(modifier = Modifier.height(16.dp))
-            LazyRow(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                item {
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
-                item {
-                    ItemContent(
-                        model = "https://upload.wikimedia.org/wikipedia/commons/1/10/Hospital_Patient_Monitor_%2817239884329%29.jpg",
-                        title = "Patient Monitor",
-                        noSeri = "RY/23/2023",
-                        unit = "Flamboyan",
-                        date = "Agustus 2023",
-                        isScanCalibration = true,
-                        onScanCalibration = {
-                            Toast.makeText(context, "Calibration", Toast.LENGTH_SHORT).show()
-                            Log.d("Klik Scan", "Calibration")
+            when (kalibrasiCheck) {
+                is Response.Loading -> {}
+                is Response.Success -> {
+                    val data = (kalibrasiCheck as Response.Success<List<Alat>>).data
+                    kalibrasiCheckCount.value = data?.size ?: 0
+
+                    if (data.isNullOrEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp)
+                                .fillMaxWidth()
+                                .height(130.dp)
+                                .background(Color.White, shape = RoundedCornerShape(9)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
                         }
-                    )
+                    }
+
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                        items(data!!.size) { index ->
+                            val alat = data[index]
+                            ItemContent(
+                                model = alat.photoUrl!!,
+                                title = alat.namaAlat!!,
+                                noSeri = alat.noSeri!!,
+                                unit = alat.unit!!,
+                                date = convertFirebaseTimestampToString(alat.pengecekanHarian!!),
+                                isScanDay = true,
+                                onScanDay = {
+                                    coroutineScope.launch {
+                                        viewModel.startScan()
+                                    }
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                    }
+
                 }
+                is Response.Failure -> {}
             }
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(70.dp))
         }
     }
 }

@@ -13,7 +13,7 @@ class LoginViewModel @Inject constructor(
     suspend fun loginUser(email: String, password: String): Boolean {
         val isLoginSuccessful = repo.loginUser(email, password)
         if (isLoginSuccessful) {
-            repo.setEmail(email)
+            repo.setUser(email)
         }
         return isLoginSuccessful
     }

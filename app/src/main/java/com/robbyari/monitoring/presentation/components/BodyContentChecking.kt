@@ -17,24 +17,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,14 +51,15 @@ fun BodyContentChecking(
     painter: Painter = painterResource(id = R.drawable.logoprikasih),
     location: String? = "",
     time: String? = "",
-    listCek: List<String>? = emptyList()
+    nameUser: String,
+    checkedItems: SnapshotStateMap<String, Boolean>,
+    checkedItemCount: Int,
+    totalItemCount: Int,
+    progressPercentage: Int,
+    listCek: Map<String, Boolean>? = emptyMap(),
+    notes: String,
+    onQueryChange: (String) -> Unit
 ) {
-    val checkedItems = remember { mutableStateMapOf<String, Boolean>() }
-
-    val checkedItemCount = checkedItems.count{it.value}
-    val totalItemCount = listCek?.size ?: 0
-    val progressPercentage = if (totalItemCount > 0) (checkedItemCount * 100) / totalItemCount else 0
-
     Column(
         modifier = Modifier
             .background(LightBlue)
@@ -75,7 +78,7 @@ fun BodyContentChecking(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "Agus Sudrajat",
+                    text = nameUser,
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Start,
@@ -133,14 +136,13 @@ fun BodyContentChecking(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Column {
-            listCek?.forEach { item ->
+            listCek?.forEach { (item, _) ->
                 CheckboxItem(
                     item = item,
                     isChecked = checkedItems[item] ?: false,
-                    onCheckedChange = { isChecked ->
-                        checkedItems[item] = isChecked
-                    }
-                )
+                ) { isChecked ->
+                    checkedItems[item] = isChecked
+                }
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -214,19 +216,23 @@ fun BodyContentChecking(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        TextFieldNote()
+        TextFieldNote(notes, onQueryChange)
     }
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun TextFieldNote() {
-    var text by remember { mutableStateOf("Semua fungsi baik") }
+fun TextFieldNote(
+    notes: String,
+    onQueryChange: (String) -> Unit
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     TextField(
-        value = text,
-        onValueChange = { text = it },
+        value = notes,
+        onValueChange = onQueryChange,
         label = { Text("Catatan:") },
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color.Gray,
@@ -235,6 +241,13 @@ fun TextFieldNote() {
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent
+        ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            },
         ),
         modifier = Modifier
             .clip(RoundedCornerShape(7))

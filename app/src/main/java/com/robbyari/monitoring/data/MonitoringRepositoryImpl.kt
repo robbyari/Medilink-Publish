@@ -8,12 +8,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.robbyari.monitoring.domain.model.Alat
+import com.robbyari.monitoring.domain.model.DailyChecking
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.domain.repository.MonitoringRepository
@@ -61,54 +63,20 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun setEmail(name: String): Response<Unit> {
+    override suspend fun setUser(email: String): Response<Unit> {
         return try {
+            val user = getUser(email)
             userDataStorePreferences.edit { preferences ->
-                preferences[KEY_NAME] = name
+                preferences[KEY_EMAIL] = email
+                preferences[KEY_FIRSTNAME] = user.firstName ?: ""
+                preferences[KEY_LASTNAME] = user.lastName ?: ""
+                preferences[KEY_PHOTO_URL] = user.photoUrl ?: ""
+                preferences[KEY_ROLE] = user.role ?: ""
+                preferences[KEY_DIVISI] = user.divisi ?: ""
             }
             Response.Success(Unit)
         } catch (e: Exception) {
             Response.Failure(e)
-        }
-    }
-
-    override suspend fun getEmail(): String {
-        return try {
-            val flow = userDataStorePreferences.data
-                .catch { exception ->
-                    if (exception is IOException) {
-                        emit(emptyPreferences())
-                    } else {
-                        throw exception
-                    }
-                }
-                .map { preferences ->
-                    preferences[KEY_NAME]
-                }
-            val value = flow.firstOrNull() ?: ""
-            value
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ""
-        }
-    }
-
-    override suspend fun getUser(email: String): User {
-        return try {
-            val querySnapshot = db.collection("User")
-                .whereEqualTo("email", email)
-                .get()
-                .await()
-
-            if (!querySnapshot.isEmpty) {
-                val userDocument = querySnapshot.documents.first()
-                val user = userDocument.toObject(User::class.java)
-                user ?: throw Exception("User not found")
-            } else {
-                throw Exception("User not found")
-            }
-        } catch (e: Exception) {
-            throw e
         }
     }
 
@@ -145,6 +113,72 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getMonthlyCheck(): Flow<Response<List<Alat>>> = callbackFlow {
+        val currentDate = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+
+        val query = db.collection("Alat")
+            .whereEqualTo("cekBulanan", true)
+            .whereLessThan("pengecekanBulanan", currentDate)
+
+        val listener = query.addSnapshotListener { querySnapshot, exception ->
+            if (exception != null) {
+                trySend(Response.Failure(exception))
+                return@addSnapshotListener
+            }
+
+            val monthlyCheckList = mutableListOf<Alat>()
+            for (document in querySnapshot!!.documents) {
+                val alat = document.toObject(Alat::class.java)
+                alat?.let { monthlyCheckList.add(it) }
+            }
+
+            trySend(Response.Success(monthlyCheckList))
+        }
+
+        awaitClose {
+            listener.remove()
+        }
+    }
+
+    override suspend fun getKalibrasiCheck(): Flow<Response<List<Alat>>> = callbackFlow {
+        val currentDate = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+
+        val query = db.collection("Alat")
+            .whereEqualTo("cekKalibrasi", true)
+            .whereLessThan("kalibrasi", currentDate)
+
+        val listener = query.addSnapshotListener { querySnapshot, exception ->
+            if (exception != null) {
+                trySend(Response.Failure(exception))
+                return@addSnapshotListener
+            }
+
+            val kalibrasiCheckList = mutableListOf<Alat>()
+            for (document in querySnapshot!!.documents) {
+                val alat = document.toObject(Alat::class.java)
+                alat?.let { kalibrasiCheckList.add(it) }
+            }
+
+            trySend(Response.Success(kalibrasiCheckList))
+        }
+
+        awaitClose {
+            listener.remove()
+        }
+    }
+
     override suspend fun getBarcodeText(): Flow<Response<String>> = flow {
         emit(Response.Loading)
         try {
@@ -174,7 +208,7 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addImageToFirebaseStorage(imageUri: Uri): Response<Uri> {
+    override suspend fun addImageToFirebaseStorage(imageUri: Uri): String {
         return try {
             val timestamp = System.currentTimeMillis()
             val uniqueFilename = "image_$timestamp.jpg"
@@ -183,18 +217,110 @@ class MonitoringRepositoryImpl @Inject constructor(
             storageReference.putFile(imageUri).await()
 
             val downloadUrl = storageReference.downloadUrl.await()
-
-            Log.d("Download Url", downloadUrl.toString())
-            Response.Success(downloadUrl)
+            downloadUrl.toString()
         } catch (e: Exception) {
-            Response.Failure(e)
+            e.printStackTrace()
+            "Gagal Upload Gambar"
+        }
+    }
+
+    override suspend fun addToDayChecking(idDocument: String, item: DailyChecking): Flow<Response<Boolean>> = flow {
+        emit(Response.Loading)
+        try {
+            val documentRef = db.collection("DayChecking")
+                .document(idDocument)
+
+            documentRef.set(item).await()
+            updateDailyChecking(item.id ?: "", item.petugasHariIni ?: "",item.waktuPegecekan ?: Timestamp(0, 0))
+            emit(Response.Success(true))
+        } catch (e: Exception) {
+            emit(Response.Failure(e))
+        }
+    }
+
+    override suspend fun getUserDataStore(): User {
+        return try {
+            val flow = userDataStorePreferences.data
+                .catch { exception ->
+                    if (exception is IOException) {
+                        emit(emptyPreferences())
+                    } else {
+                        throw exception
+                    }
+                }
+                .map { preferences ->
+                    val firstname = preferences[KEY_FIRSTNAME]
+                    val lastname = preferences[KEY_LASTNAME]
+                    val email = preferences[KEY_EMAIL]
+                    val photo = preferences[KEY_PHOTO_URL]
+                    val role = preferences[KEY_ROLE]
+                    val divisi = preferences[KEY_DIVISI]
+
+                    User(
+                        firstName = firstname,
+                        lastName = lastname,
+                        email = email,
+                        photoUrl = photo,
+                        role = role,
+                        divisi = divisi
+                    )
+                }
+            val value = flow.firstOrNull() ?: User()
+            value
+        } catch (e: Exception) {
+            e.printStackTrace()
+            User()
+        }
+    }
+
+    private suspend fun getUser(email: String): User {
+        return try {
+            val querySnapshot = db.collection("User")
+                .whereEqualTo("email", email)
+                .get()
+                .await()
+
+            if (!querySnapshot.isEmpty) {
+                val userDocument = querySnapshot.documents.first()
+                val user = userDocument.toObject(User::class.java)
+                user ?: throw Exception("User not found")
+            } else {
+                throw Exception("User not found")
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    private suspend fun updateDailyChecking(id: String, petugasHariIni: String, timestamp: Timestamp) {
+        try {
+            val doc = FirebaseFirestore.getInstance().collection("Alat")
+            val documentSnapshot = doc.document(id).get().await()
+
+            if (!documentSnapshot.exists()) {
+                Log.d("Kosong", "")
+            }
+
+            if (documentSnapshot.exists()) {
+                doc.document(id).update("pengecekanHarian", timestamp)
+                doc.document(id).update("terakhirDicekOleh", petugasHariIni)
+                Log.d("Berhasil Update", "")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     companion object {
-        val KEY_NAME = stringPreferencesKey(
-            name = "settings"
-        )
+        val KEY_UID = stringPreferencesKey("uid")
+        val KEY_FIRSTNAME = stringPreferencesKey("firstname")
+        val KEY_LASTNAME = stringPreferencesKey("lastname")
+        val KEY_EMAIL = stringPreferencesKey("email")
+        val KEY_PASSWORD = stringPreferencesKey("password")
+        val KEY_PHOTO_URL = stringPreferencesKey("photourl")
+        val KEY_ROLE = stringPreferencesKey("role")
+        val KEY_DIVISI = stringPreferencesKey("divisi")
+        val KEY_STATUS = stringPreferencesKey("status")
     }
 
 }

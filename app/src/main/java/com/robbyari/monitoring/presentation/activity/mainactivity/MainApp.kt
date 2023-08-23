@@ -58,6 +58,7 @@ fun MainApp(
                     id = id,
                     location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
+                    navigateBack = { navController.popBackStack() },
                     backHandler = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Home.route) {

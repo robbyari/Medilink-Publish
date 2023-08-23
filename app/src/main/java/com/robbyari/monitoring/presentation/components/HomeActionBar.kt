@@ -34,6 +34,7 @@ import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 
 @Composable
 fun HomeActionBar(
+    nameDataStore: String,
     user: User
 ) {
     Row(
@@ -73,7 +74,7 @@ fun HomeActionBar(
                 fontSize = 16.sp,
             )
             Text(
-                text = "${user.firstName} ${user.lastName}",
+                text = nameDataStore,
                 fontSize = 20.sp,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold
@@ -97,6 +98,6 @@ fun HomeActionBar(
 @Composable
 fun HomeActionBarPreview() {
     MonitoringTheme {
-        HomeActionBar(user = User())
+      //  HomeActionBar(user = User())
     }
 }
