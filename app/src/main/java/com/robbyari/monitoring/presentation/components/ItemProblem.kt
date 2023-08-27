@@ -32,7 +32,7 @@ import coil.compose.AsyncImage
 import com.robbyari.monitoring.presentation.theme.Blue
 
 @Composable
-fun ItemContent(
+fun ItemProblem(
     model: String,
     title: String,
     noSeri: String,

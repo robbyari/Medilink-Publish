@@ -17,8 +17,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.robbyari.monitoring.presentation.navigation.Screen
+import com.robbyari.monitoring.presentation.screen.calibrationchecking.CalibrationCheckingScreen
 import com.robbyari.monitoring.presentation.screen.daychecking.DayCheckingScreen
 import com.robbyari.monitoring.presentation.screen.home.HomeScreen
+import com.robbyari.monitoring.presentation.screen.monthchecking.MonthCheckingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,13 +41,19 @@ fun MainApp(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.DayChecking.createRoute("Cu62hgGla4hnYES"),
+            startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(
                     navigateToDayChecking = { id ->
                         navController.navigate(Screen.DayChecking.createRoute(id))
+                    },
+                    navigateToMonthChecking = { id ->
+                        navController.navigate(Screen.MonthChecking.createRoute(id))
+                    },
+                    navigateToCalibrationChecking = { id ->
+                        navController.navigate(Screen.CalibrationChecking.createRoute(id))
                     }
                 )
             }
@@ -55,6 +63,44 @@ fun MainApp(
             ) {
                 val id = it.arguments?.getString("id") ?: ""
                 DayCheckingScreen(
+                    id = id,
+                    location = location,
+                    isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
+                    navigateBack = { navController.popBackStack() },
+                    backHandler = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+            composable(
+                route = Screen.MonthChecking.route,
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) {
+                val id = it.arguments?.getString("id") ?: ""
+                MonthCheckingScreen(
+                    id = id,
+                    location = location,
+                    isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
+                    navigateBack = { navController.popBackStack() },
+                    backHandler = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+            composable(
+                route = Screen.CalibrationChecking.route,
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) {
+                val id = it.arguments?.getString("id") ?: ""
+                CalibrationCheckingScreen(
                     id = id,
                     location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,

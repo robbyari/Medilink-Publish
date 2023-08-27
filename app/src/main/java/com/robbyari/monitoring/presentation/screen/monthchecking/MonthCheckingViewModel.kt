@@ -1,4 +1,4 @@
-package com.robbyari.monitoring.presentation.screen.daychecking
+package com.robbyari.monitoring.presentation.screen.monthchecking
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DayCheckingViewModel @Inject constructor(
+class MonthCheckingViewModel @Inject constructor(
     private val repo: MonitoringRepository
 ) : ViewModel() {
 
@@ -26,8 +26,8 @@ class DayCheckingViewModel @Inject constructor(
     private val _detail = MutableStateFlow<Response<Alat>>(Response.Loading)
     val detail: StateFlow<Response<Alat>> = _detail
 
-    private val _addDayChecking = MutableStateFlow<Response<Boolean>>(Response.Loading)
-    val addDayChecking: StateFlow<Response<Boolean>> = _addDayChecking
+    private val _addMonthChecking = MutableStateFlow<Response<Boolean>>(Response.Loading)
+    val addMonthChecking: StateFlow<Response<Boolean>> = _addMonthChecking
 
     private val _addToReportProblem = MutableStateFlow<Response<Boolean>>(Response.Loading)
     val addToReportProblem: StateFlow<Response<Boolean>> = _addToReportProblem
@@ -46,12 +46,12 @@ class DayCheckingViewModel @Inject constructor(
         return repo.addImageToFirebaseStorage(imageUri)
     }
 
-    suspend fun addToDayChecking(idDocument: String, item: Checking) {
+    suspend fun addToMonthChecking(idDocument: String, item: Checking) {
         viewModelScope.launch {
             try {
-                repo.addToDayChecking(idDocument, item)
+                repo.addToMonthChecking(idDocument, item)
                     .collect {
-                        _addDayChecking.value = it
+                        _addMonthChecking.value = it
                     }
             } catch (e: Exception) {
                 e.printStackTrace()

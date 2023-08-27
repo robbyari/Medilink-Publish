@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.WorkHistory
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,11 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.robbyari.monitoring.domain.model.Alat
+import com.robbyari.monitoring.domain.model.ReportProblem
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.presentation.components.CardContent
 import com.robbyari.monitoring.presentation.components.HomeActionBar
 import com.robbyari.monitoring.presentation.components.ItemContent
+import com.robbyari.monitoring.presentation.components.ItemProblem
 import com.robbyari.monitoring.presentation.components.TitleBar
 import com.robbyari.monitoring.presentation.theme.LightBlue
 import com.robbyari.monitoring.utils.BottomShadow
@@ -48,31 +52,45 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    navigateToDayChecking: (String) -> Unit
+    navigateToDayChecking: (String) -> Unit,
+    navigateToMonthChecking: (String) -> Unit,
+    navigateToCalibrationChecking: (String) -> Unit
 ) {
     val userDataStore by viewModel.userDataStore.collectAsState()
     val context = LocalContext.current
 
     val barcodeResult: Response<String> by viewModel.barcodeResult.collectAsState()
+    val navigateToDayCheckingState = remember { mutableStateOf(false) }
+    val navigateToMonthCheckingState = remember { mutableStateOf(false) }
+    val navigateCalibrationCheckingState = remember { mutableStateOf(false) }
 
     LaunchedEffect(barcodeResult) {
         when (barcodeResult) {
             is Response.Success -> {
                 val scannedValue = (barcodeResult as Response.Success<String>).data
                 if (scannedValue != null) {
-                    navigateToDayChecking(scannedValue)
+                    if (navigateToDayCheckingState.value) {
+                        navigateToDayChecking(scannedValue)
+                    }
+                    if (navigateToMonthCheckingState.value) {
+                        navigateToMonthChecking(scannedValue)
+                    }
+                    if (navigateCalibrationCheckingState.value) {
+                        navigateToCalibrationChecking(scannedValue)
+                    }
                 }
             }
-
             else -> {}
         }
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HomeContent(nameDataStore = "${userDataStore.firstName} ${userDataStore.lastName}", user = userDataStore)
+        HomeContent(nameDataStore = "${userDataStore.firstName} ${userDataStore.lastName}", user = userDataStore, navigateToDayCheckingState, navigateToMonthCheckingState, navigateCalibrationCheckingState)
     }
 }
 
@@ -80,16 +98,24 @@ fun HomeScreen(
 fun HomeContent(
     nameDataStore: String,
     user: User,
+    navigateToDayChecking: MutableState<Boolean>,
+    navigateToMonthChecking:  MutableState<Boolean>,
+    navigateToCalibrationChecking:  MutableState<Boolean>,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
 
     val coroutineScope = rememberCoroutineScope()
+    val reportCheck by viewModel.reportProblemCheck.collectAsState()
     val dailyCheck by viewModel.dailyCheck.collectAsState()
     val dailyCheckCount = remember { mutableStateOf(0) }
     val monthlyCheck by viewModel.monthlyCheck.collectAsState()
     val monthlyCheckCount = remember { mutableStateOf(0) }
-    val kalibrasiCheck by viewModel.kalibrasiCheck.collectAsState()
-    val kalibrasiCheckCount = remember { mutableStateOf(0) }
+    val calibrationCheck by viewModel.calibrationCheck.collectAsState()
+    val calibrationCheckCount = remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchReportProblem()
+    }
 
     LaunchedEffect(Unit) {
         viewModel.fetchDailyCheck()
@@ -100,11 +126,11 @@ fun HomeContent(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchKalibrasiCheck()
+        viewModel.fetchCalibrationCheck()
     }
 
     Column {
-        Spacer(modifier = Modifier.height(38.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         HomeActionBar(nameDataStore = nameDataStore, user = user)
         Spacer(modifier = Modifier.height(16.dp))
         BottomShadow()
@@ -139,22 +165,60 @@ fun HomeContent(
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.WorkHistory, title = "Kalibrasi Alat", total = kalibrasiCheckCount.value)
+                    CardContent(icon = Icons.Filled.WorkHistory, title = "Kalibrasi Alat", total = calibrationCheckCount.value)
                     Spacer(modifier = Modifier.width(16.dp))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
             TitleBar(title = "Laporan Rusak", detail = "Semua")
-            Box(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .height(130.dp)
-                    .background(Color.White, shape = RoundedCornerShape(9)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            when (reportCheck) {
+                is Response.Loading -> {}
+                is Response.Success -> {
+                    val data = (reportCheck as Response.Success<List<ReportProblem>>).data
+
+                    if (data.isNullOrEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp)
+                                .fillMaxWidth()
+                                .height(130.dp)
+                                .background(Color.White, shape = RoundedCornerShape(9)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
+                        }
+                    }
+
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                        items(data!!.size) { index ->
+                            val reportProblem = data[index]
+                            ItemProblem(
+                                model = reportProblem.photoUrl!!,
+                                title = reportProblem.namaAlat!!,
+                                noSeri = reportProblem.noSeri!!,
+                                unit = reportProblem.unit!!,
+                                date = "09 Agu 2023 - 09:00",
+                                isScanDay = true,
+                                onScanDay = {
+                                    coroutineScope.launch {
+                                        navigateToDayChecking.value = true
+                                        viewModel.startScan()
+                                    }
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                    }
+                }
+                is Response.Failure -> {}
             }
+            Spacer(modifier = Modifier.height(16.dp))
             TitleBar(title = "Pengecekan Harian", detail = "Semua")
             Spacer(modifier = Modifier.height(16.dp))
             when (dailyCheck) {
@@ -186,13 +250,14 @@ fun HomeContent(
                             val alat = data[index]
                             ItemContent(
                                 model = alat.photoUrl!!,
-                                title = alat.namaAlat!!,
+                                title = "alat.namaAlat!! jnernr rirnir ",
                                 noSeri = alat.noSeri!!,
                                 unit = alat.unit!!,
                                 date = convertFirebaseTimestampToString(alat.pengecekanHarian!!),
                                 isScanDay = true,
                                 onScanDay = {
                                     coroutineScope.launch {
+                                        navigateToDayChecking.value = true
                                         viewModel.startScan()
                                     }
                                 }
@@ -201,7 +266,6 @@ fun HomeContent(
                         }
                     }
                 }
-
                 is Response.Failure -> {}
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -239,10 +303,11 @@ fun HomeContent(
                                 title = alat.namaAlat!!,
                                 noSeri = alat.noSeri!!,
                                 unit = alat.unit!!,
-                                date = convertFirebaseTimestampToString(alat.pengecekanHarian!!),
-                                isScanDay = true,
-                                onScanDay = {
+                                date = convertFirebaseTimestampToString(alat.pengecekanBulanan!!),
+                                isScanMonth = true,
+                                onScanMonth = {
                                     coroutineScope.launch {
+                                        navigateToMonthChecking.value = true
                                         viewModel.startScan()
                                     }
                                 }
@@ -257,11 +322,11 @@ fun HomeContent(
             Spacer(modifier = Modifier.height(16.dp))
             TitleBar(title = "Kalibrasi Alat", detail = "Semua")
             Spacer(modifier = Modifier.height(16.dp))
-            when (kalibrasiCheck) {
+            when (calibrationCheck) {
                 is Response.Loading -> {}
                 is Response.Success -> {
-                    val data = (kalibrasiCheck as Response.Success<List<Alat>>).data
-                    kalibrasiCheckCount.value = data?.size ?: 0
+                    val data = (calibrationCheck as Response.Success<List<Alat>>).data
+                    calibrationCheckCount.value = data?.size ?: 0
 
                     if (data.isNullOrEmpty()) {
                         Box(
@@ -289,10 +354,11 @@ fun HomeContent(
                                 title = alat.namaAlat!!,
                                 noSeri = alat.noSeri!!,
                                 unit = alat.unit!!,
-                                date = convertFirebaseTimestampToString(alat.pengecekanHarian!!),
-                                isScanDay = true,
-                                onScanDay = {
+                                date = convertFirebaseTimestampToString(alat.kalibrasi!!),
+                                isScanCalibration = true,
+                                onScanCalibration = {
                                     coroutineScope.launch {
+                                        navigateToCalibrationChecking.value = true
                                         viewModel.startScan()
                                     }
                                 }
@@ -304,7 +370,7 @@ fun HomeContent(
                 }
                 is Response.Failure -> {}
             }
-            Spacer(modifier = Modifier.height(70.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.robbyari.monitoring.presentation.screen.daychecking
+package com.robbyari.monitoring.presentation.screen.calibrationchecking
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -45,7 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -62,7 +61,6 @@ import com.robbyari.monitoring.presentation.components.BottomSheet
 import com.robbyari.monitoring.presentation.components.DetailHeaderContent
 import com.robbyari.monitoring.presentation.components.ShowAlertDialog
 import com.robbyari.monitoring.presentation.theme.Blue
-import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 import com.robbyari.monitoring.utils.convertStringToFirebaseTimestamp
 import com.robbyari.monitoring.utils.createImageFile
 import com.robbyari.monitoring.utils.generateTimestamp
@@ -73,13 +71,13 @@ import java.util.Locale
 import java.util.Objects
 
 @Composable
-fun DayCheckingScreen(
+fun CalibrationCheckingScreen(
     id: String?,
     location: String?,
     backHandler: () -> Unit,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
-    viewModel: DayCheckingViewModel = hiltViewModel()
+    viewModel: CalibrationCheckingViewModel = hiltViewModel()
 ) {
     BackHandler(onBack = backHandler)
     val context = LocalContext.current
@@ -90,21 +88,19 @@ fun DayCheckingScreen(
     val totalItemCount = remember { mutableStateOf(0) }
     val progressPercentage = if (totalItemCount.value > 0) (checkedItemCount * 100) / totalItemCount.value else 0
     val (notes, onQueryChange) = remember { mutableStateOf("Semua fungsi baik") }
-    val (notesReport, onQueryChangeReport) = remember { mutableStateOf("") }
 
     val userDataStore by viewModel.userDataStore.collectAsState()
     var isLoading by remember { mutableStateOf(false) }
-    var isLoadingReportProblem by remember { mutableStateOf(false) }
     val timestampString by remember { mutableStateOf(generateTimestamp()) }
+
+    val addDayChecking by viewModel.addCalibrationChecking.collectAsState()
 
     val detailState: Response<Alat> by viewModel.detail.collectAsState()
 
+    val (notesReport, onQueryChangeReport) = remember { mutableStateOf("") }
+    var isLoadingReportProblem by remember { mutableStateOf(false) }
     var showSheet by remember { mutableStateOf(false) }
-
-    val addDayChecking by viewModel.addDayChecking.collectAsState()
-
     val addToReportProblem by viewModel.addToReportProblem.collectAsState()
-
     val showSuccessDialog = remember { mutableStateOf(false) }
 
     val file = context.createImageFile()
@@ -153,13 +149,14 @@ fun DayCheckingScreen(
                 showSheet = false
                 showSuccessDialog.value = true
             }
+
             else -> {}
         }
     }
 
     LaunchedEffect(id) {
         if (id != null) {
-            viewModel.getDetail(id)
+            viewModel.getDetail("Nu62hgGla4hD6qz")
         }
     }
 
@@ -228,11 +225,11 @@ fun DayCheckingScreen(
                             .systemBarsPadding()
                     ) {
                         ActionBarDetail(
-                            title = "Pengecekan Harian",
+                            title = "Pengecekan Kalibrasi",
                             navigateBack = backHandler,
                             modifier = Modifier
                         )
-                        DetailHeaderContent(data = data, dayChecking = true)
+                        DetailHeaderContent(data = data, calibrationChecking = true)
                         BodyContentChecking(
                             time = timestampString,
                             location = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
@@ -288,7 +285,7 @@ fun DayCheckingScreen(
             {
                 Icon(
                     imageVector = Icons.Default.ReportProblem,
-                    contentDescription = "Icon Kirim",
+                    contentDescription = "Icon laporkan masalah",
                     tint = Color.White,
                     modifier = Modifier
                 )
@@ -321,7 +318,7 @@ fun DayCheckingScreen(
                                 progress = "$checkedItemCount/${totalItemCount.value} Selesai",
                                 catatan = notes
                             )
-                            viewModel.addToDayChecking(timeStamp, checkingItem)
+                            viewModel.addToCalibrationChecking(timeStamp, checkingItem)
                         }
                     } else {
                         isLoading = false
@@ -350,14 +347,5 @@ fun DayCheckingScreen(
                 }
             }
         }
-    }
-}
-
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun DayCheckingScreenPreview() {
-    MonitoringTheme {
-
     }
 }

@@ -15,10 +15,13 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.robbyari.monitoring.domain.model.Alat
-import com.robbyari.monitoring.domain.model.DailyChecking
+import com.robbyari.monitoring.domain.model.Checking
+import com.robbyari.monitoring.domain.model.ReportProblem
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.domain.repository.MonitoringRepository
+import com.robbyari.monitoring.utils.add30DaysToTimestamp
+import com.robbyari.monitoring.utils.addOneYearToTimestamp
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -146,7 +149,7 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getKalibrasiCheck(): Flow<Response<List<Alat>>> = callbackFlow {
+    override suspend fun getCalibrationCheck(): Flow<Response<List<Alat>>> = callbackFlow {
         val currentDate = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
             set(Calendar.HOUR_OF_DAY, 0)
@@ -224,7 +227,7 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addToDayChecking(idDocument: String, item: DailyChecking): Flow<Response<Boolean>> = flow {
+    override suspend fun addToDayChecking(idDocument: String, item: Checking): Flow<Response<Boolean>> = flow {
         emit(Response.Loading)
         try {
             val documentRef = db.collection("DayChecking")
@@ -232,6 +235,34 @@ class MonitoringRepositoryImpl @Inject constructor(
 
             documentRef.set(item).await()
             updateDailyChecking(item.id ?: "", item.petugasHariIni ?: "",item.waktuPegecekan ?: Timestamp(0, 0))
+            emit(Response.Success(true))
+        } catch (e: Exception) {
+            emit(Response.Failure(e))
+        }
+    }
+
+    override suspend fun addToMonthChecking(idDocument: String, item: Checking): Flow<Response<Boolean>> = flow {
+        emit(Response.Loading)
+        try {
+            val documentRef = db.collection("MonthChecking")
+                .document(idDocument)
+
+            documentRef.set(item).await()
+            updateMonthlyChecking(item.id ?: "", item.petugasHariIni ?: "", add30DaysToTimestamp(item.waktuPegecekan ?: Timestamp(0, 0)))
+            emit(Response.Success(true))
+        } catch (e: Exception) {
+            emit(Response.Failure(e))
+        }
+    }
+
+    override suspend fun addToCalibrationChecking(idDocument: String, item: Checking): Flow<Response<Boolean>> = flow {
+        emit(Response.Loading)
+        try {
+            val documentRef = db.collection("CalibrationChecking")
+                .document(idDocument)
+
+            documentRef.set(item).await()
+            updateCalibrationChecking(item.id ?: "", item.petugasHariIni ?: "", addOneYearToTimestamp(item.waktuPegecekan ?: Timestamp(0, 0)))
             emit(Response.Success(true))
         } catch (e: Exception) {
             emit(Response.Failure(e))
@@ -273,6 +304,42 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun addToReportProblem(idDocument: String, item: ReportProblem): Flow<Response<Boolean>> = flow {
+        emit(Response.Loading)
+        try {
+            val documentRef = db.collection("ReportProblem")
+                .document(idDocument)
+
+            documentRef.set(item).await()
+            emit(Response.Success(true))
+        } catch (e: Exception) {
+            emit(Response.Failure(e))
+        }
+    }
+
+    override suspend fun getReportProblem(): Flow<Response<List<ReportProblem>>> = callbackFlow {
+        val query = db.collection("ReportProblem")
+
+        val listener = query.addSnapshotListener { querySnapshot, exception ->
+            if (exception != null) {
+                trySend(Response.Failure(exception))
+                return@addSnapshotListener
+            }
+
+            val reportProblem = mutableListOf<ReportProblem>()
+            for (document in querySnapshot!!.documents) {
+                val data = document.toObject(ReportProblem::class.java)
+                data?.let { reportProblem.add(it) }
+            }
+
+            trySend(Response.Success(reportProblem))
+        }
+
+        awaitClose {
+            listener.remove()
+        }
+    }
+
     private suspend fun getUser(email: String): User {
         return try {
             val querySnapshot = db.collection("User")
@@ -303,6 +370,44 @@ class MonitoringRepositoryImpl @Inject constructor(
 
             if (documentSnapshot.exists()) {
                 doc.document(id).update("pengecekanHarian", timestamp)
+                doc.document(id).update("terakhirDicekOleh", petugasHariIni)
+                Log.d("Berhasil Update", "")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private suspend fun updateMonthlyChecking(id: String, petugasHariIni: String, timestamp: Timestamp) {
+        try {
+            val doc = FirebaseFirestore.getInstance().collection("Alat")
+            val documentSnapshot = doc.document(id).get().await()
+
+            if (!documentSnapshot.exists()) {
+                Log.d("Kosong", "")
+            }
+
+            if (documentSnapshot.exists()) {
+                doc.document(id).update("pengecekanBulanan", timestamp)
+                doc.document(id).update("terakhirDicekOleh", petugasHariIni)
+                Log.d("Berhasil Update", "")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private suspend fun updateCalibrationChecking(id: String, petugasHariIni: String, timestamp: Timestamp) {
+        try {
+            val doc = FirebaseFirestore.getInstance().collection("Alat")
+            val documentSnapshot = doc.document(id).get().await()
+
+            if (!documentSnapshot.exists()) {
+                Log.d("Kosong", "")
+            }
+
+            if (documentSnapshot.exists()) {
+                doc.document(id).update("kalibrasi", timestamp)
                 doc.document(id).update("terakhirDicekOleh", petugasHariIni)
                 Log.d("Berhasil Update", "")
             }

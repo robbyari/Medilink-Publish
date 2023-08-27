@@ -23,3 +23,23 @@ fun convertStringToFirebaseTimestamp(dateTimeString: String): Timestamp {
     val timestamp = date?.time ?: 0
     return Timestamp(timestamp / 1000, ((timestamp % 1000) * 1000).toInt())
 }
+
+fun add30DaysToTimestamp(timestamp: Timestamp): Timestamp {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = timestamp.seconds * 1000L
+
+    calendar.add(Calendar.DAY_OF_MONTH, 30)
+
+    val newTimestamp = Timestamp(calendar.time)
+    return newTimestamp
+}
+
+fun addOneYearToTimestamp(timestamp: Timestamp): Timestamp {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = timestamp.seconds * 1000L
+
+    calendar.add(Calendar.YEAR, 1)
+
+    val newTimestamp = Timestamp(calendar.time)
+    return newTimestamp
+}

@@ -1,4 +1,4 @@
-package com.robbyari.monitoring.presentation.screen.daychecking
+package com.robbyari.monitoring.presentation.screen.calibrationchecking
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -16,22 +16,20 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DayCheckingViewModel @Inject constructor(
+class CalibrationCheckingViewModel @Inject constructor(
     private val repo: MonitoringRepository
 ) : ViewModel() {
-
     private val _userDataStore = MutableStateFlow(User())
     val userDataStore: StateFlow<User> = _userDataStore
 
     private val _detail = MutableStateFlow<Response<Alat>>(Response.Loading)
     val detail: StateFlow<Response<Alat>> = _detail
 
-    private val _addDayChecking = MutableStateFlow<Response<Boolean>>(Response.Loading)
-    val addDayChecking: StateFlow<Response<Boolean>> = _addDayChecking
+    private val _addCalibrationChecking = MutableStateFlow<Response<Boolean>>(Response.Loading)
+    val addCalibrationChecking: StateFlow<Response<Boolean>> = _addCalibrationChecking
 
     private val _addToReportProblem = MutableStateFlow<Response<Boolean>>(Response.Loading)
     val addToReportProblem: StateFlow<Response<Boolean>> = _addToReportProblem
-
     init {
         viewModelScope.launch {
             getUserDataStore()
@@ -46,19 +44,18 @@ class DayCheckingViewModel @Inject constructor(
         return repo.addImageToFirebaseStorage(imageUri)
     }
 
-    suspend fun addToDayChecking(idDocument: String, item: Checking) {
+    suspend fun addToCalibrationChecking(idDocument: String, item: Checking) {
         viewModelScope.launch {
             try {
-                repo.addToDayChecking(idDocument, item)
+                repo.addToCalibrationChecking(idDocument, item)
                     .collect {
-                        _addDayChecking.value = it
+                        _addCalibrationChecking.value = it
                     }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
-
     suspend fun addToReportProblem(idDocument: String, item: ReportProblem) {
         viewModelScope.launch {
             try {
@@ -71,7 +68,6 @@ class DayCheckingViewModel @Inject constructor(
             }
         }
     }
-
     suspend fun getDetail(id: String) {
         viewModelScope.launch {
             try {

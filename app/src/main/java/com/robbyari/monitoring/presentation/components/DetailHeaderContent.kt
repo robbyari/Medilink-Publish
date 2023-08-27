@@ -28,7 +28,10 @@ import com.robbyari.monitoring.utils.convertFirebaseTimestampToString
 
 @Composable
 fun DetailHeaderContent(
-    data: Alat
+    data: Alat,
+    dayChecking: Boolean = false,
+    monthChecking: Boolean = false,
+    calibrationChecking: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -79,7 +82,9 @@ fun DetailHeaderContent(
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth()) {
-            Column (modifier = Modifier.weight(0.5f).padding(start = 16.dp)) {
+            Column(modifier = Modifier
+                .weight(0.5f)
+                .padding(start = 16.dp)) {
                 Text(
                     text = "Petugas terakhir : ",
                     fontSize = 16.sp,
@@ -98,7 +103,9 @@ fun DetailHeaderContent(
                     modifier = Modifier.padding(end = 16.dp)
                 )
             }
-            Column(modifier = Modifier.weight(0.5f).padding(end = 16.dp)) {
+            Column(modifier = Modifier
+                .weight(0.5f)
+                .padding(end = 16.dp)) {
                 Text(
                     text = "Terakhir dicek : ",
                     fontSize = 16.sp,
@@ -108,7 +115,19 @@ fun DetailHeaderContent(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "${convertFirebaseTimestampToString(data.pengecekanHarian!!)}",
+                    text =
+                    when (true) {
+                        dayChecking -> {
+                            convertFirebaseTimestampToString(data.pengecekanHarian!!)
+                        }
+                        monthChecking -> {
+                            convertFirebaseTimestampToString(data.pengecekanBulanan!!)
+                        }
+                        calibrationChecking -> {
+                            convertFirebaseTimestampToString(data.kalibrasi!!)
+                        }
+                        else -> {"Tidak ada"}
+                    },
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Start,

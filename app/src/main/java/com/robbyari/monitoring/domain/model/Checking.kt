@@ -2,7 +2,7 @@ package com.robbyari.monitoring.domain.model
 
 import com.google.firebase.Timestamp
 
-data class DailyChecking(
+data class Checking(
     val id: String? = "",
     val noSeri: String? = "",
     val namaAlat: String? = "",

@@ -6,4 +6,10 @@ sealed class Screen(val route: String) {
     object DayChecking : Screen("daychecking/{id}") {
         fun createRoute(id: String?) = "daychecking/${id}"
     }
+    object MonthChecking : Screen("monthchecking/{id}") {
+        fun createRoute(id: String?) = "monthchecking/${id}"
+    }
+    object CalibrationChecking : Screen("calibrationchecking/{id}") {
+        fun createRoute(id: String?) = "calibrationchecking/${id}"
+    }
 }

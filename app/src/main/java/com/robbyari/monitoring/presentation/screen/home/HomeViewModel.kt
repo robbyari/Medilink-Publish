@@ -3,6 +3,7 @@ package com.robbyari.monitoring.presentation.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robbyari.monitoring.domain.model.Alat
+import com.robbyari.monitoring.domain.model.ReportProblem
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.domain.repository.MonitoringRepository
@@ -20,14 +21,17 @@ class HomeViewModel @Inject constructor(
     private val _userDataStore = MutableStateFlow(User())
     val userDataStore: StateFlow<User> = _userDataStore
 
+    private val _reportProblemCheck = MutableStateFlow<Response<List<ReportProblem>>>(Response.Loading)
+    val reportProblemCheck: StateFlow<Response<List<ReportProblem>>> = _reportProblemCheck
+
     private val _dailyCheck = MutableStateFlow<Response<List<Alat>>>(Response.Loading)
     val dailyCheck: StateFlow<Response<List<Alat>>> = _dailyCheck
 
     private val _monthlyCheck = MutableStateFlow<Response<List<Alat>>>(Response.Loading)
     val monthlyCheck: StateFlow<Response<List<Alat>>> = _monthlyCheck
 
-    private val _kalibrasiCheck = MutableStateFlow<Response<List<Alat>>>(Response.Loading)
-    val kalibrasiCheck: StateFlow<Response<List<Alat>>> = _kalibrasiCheck
+    private val _calibrationCheck = MutableStateFlow<Response<List<Alat>>>(Response.Loading)
+    val calibrationCheck: StateFlow<Response<List<Alat>>> = _calibrationCheck
 
     private val _barcodeResult = MutableStateFlow<Response<String>>(Response.Loading)
     val barcodeResult: StateFlow<Response<String>> = _barcodeResult
@@ -40,6 +44,17 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun getUserDataStore() {
         _userDataStore.value = repo.getUserDataStore()
+    }
+
+    suspend fun fetchReportProblem() {
+        _reportProblemCheck.value = Response.Loading
+        try {
+            repo.getReportProblem().collectLatest {
+                _reportProblemCheck.emit(it)
+            }
+        } catch (e: Exception) {
+            _reportProblemCheck.emit(Response.Failure(e))
+        }
     }
 
     suspend fun fetchDailyCheck() {
@@ -64,14 +79,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    suspend fun fetchKalibrasiCheck() {
-        _kalibrasiCheck.value = Response.Loading
+    suspend fun fetchCalibrationCheck() {
+        _calibrationCheck.value = Response.Loading
         try {
-            repo.getKalibrasiCheck().collectLatest {
-                _kalibrasiCheck.emit(it)
+            repo.getCalibrationCheck().collectLatest {
+                _calibrationCheck.emit(it)
             }
         } catch (e: Exception) {
-            _kalibrasiCheck.emit(Response.Failure(e))
+            _calibrationCheck.emit(Response.Failure(e))
         }
     }
 

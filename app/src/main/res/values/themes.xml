@@ -3,7 +3,7 @@
 
     <style name="Theme.Monitoring" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <style name="SplashScreenTheme" parent="Theme.Monitoring">

@@ -1,4 +1,4 @@
-package com.robbyari.monitoring.presentation.screen.daychecking
+package com.robbyari.monitoring.presentation.screen.monthchecking
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -45,7 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -62,7 +61,6 @@ import com.robbyari.monitoring.presentation.components.BottomSheet
 import com.robbyari.monitoring.presentation.components.DetailHeaderContent
 import com.robbyari.monitoring.presentation.components.ShowAlertDialog
 import com.robbyari.monitoring.presentation.theme.Blue
-import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 import com.robbyari.monitoring.utils.convertStringToFirebaseTimestamp
 import com.robbyari.monitoring.utils.createImageFile
 import com.robbyari.monitoring.utils.generateTimestamp
@@ -73,38 +71,36 @@ import java.util.Locale
 import java.util.Objects
 
 @Composable
-fun DayCheckingScreen(
+fun MonthCheckingScreen(
     id: String?,
     location: String?,
     backHandler: () -> Unit,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
-    viewModel: DayCheckingViewModel = hiltViewModel()
+    viewModel: MonthCheckingViewModel = hiltViewModel()
 ) {
     BackHandler(onBack = backHandler)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val checkedItems = remember { mutableStateMapOf<String, Boolean>() }
-    val checkedItemCount = checkedItems.count { it.value }
+    val checkedItemCount = checkedItems.count{it.value}
     val totalItemCount = remember { mutableStateOf(0) }
     val progressPercentage = if (totalItemCount.value > 0) (checkedItemCount * 100) / totalItemCount.value else 0
     val (notes, onQueryChange) = remember { mutableStateOf("Semua fungsi baik") }
-    val (notesReport, onQueryChangeReport) = remember { mutableStateOf("") }
 
     val userDataStore by viewModel.userDataStore.collectAsState()
     var isLoading by remember { mutableStateOf(false) }
-    var isLoadingReportProblem by remember { mutableStateOf(false) }
     val timestampString by remember { mutableStateOf(generateTimestamp()) }
+
+    val addDayChecking by viewModel.addMonthChecking.collectAsState()
 
     val detailState: Response<Alat> by viewModel.detail.collectAsState()
 
+    val (notesReport, onQueryChangeReport) = remember { mutableStateOf("") }
+    var isLoadingReportProblem by remember { mutableStateOf(false) }
     var showSheet by remember { mutableStateOf(false) }
-
-    val addDayChecking by viewModel.addDayChecking.collectAsState()
-
     val addToReportProblem by viewModel.addToReportProblem.collectAsState()
-
     val showSuccessDialog = remember { mutableStateOf(false) }
 
     val file = context.createImageFile()
@@ -140,9 +136,7 @@ fun DayCheckingScreen(
             is Response.Success -> {
                 navigateBack()
                 isLoading = false
-            }
-
-            else -> {}
+            } else -> {}
         }
     }
 
@@ -228,11 +222,11 @@ fun DayCheckingScreen(
                             .systemBarsPadding()
                     ) {
                         ActionBarDetail(
-                            title = "Pengecekan Harian",
+                            title = "Pengecekan Bulanan",
                             navigateBack = backHandler,
                             modifier = Modifier
                         )
-                        DetailHeaderContent(data = data, dayChecking = true)
+                        DetailHeaderContent(data = data, monthChecking = true)
                         BodyContentChecking(
                             time = timestampString,
                             location = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
@@ -277,7 +271,7 @@ fun DayCheckingScreen(
         ) {
             TextButton(
                 onClick = {
-                    showSheet = true
+                          showSheet = true
                 },
                 modifier = Modifier
                     .padding(start = 16.dp)
@@ -321,7 +315,7 @@ fun DayCheckingScreen(
                                 progress = "$checkedItemCount/${totalItemCount.value} Selesai",
                                 catatan = notes
                             )
-                            viewModel.addToDayChecking(timeStamp, checkingItem)
+                            viewModel.addToMonthChecking(timeStamp, checkingItem)
                         }
                     } else {
                         isLoading = false
@@ -350,14 +344,5 @@ fun DayCheckingScreen(
                 }
             }
         }
-    }
-}
-
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun DayCheckingScreenPreview() {
-    MonitoringTheme {
-
     }
 }

@@ -35,7 +35,8 @@ import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 @Composable
 fun HomeActionBar(
     nameDataStore: String,
-    user: User
+    user: User,
+    roleUser: Boolean = false
 ) {
     Row(
         modifier = Modifier
@@ -81,16 +82,18 @@ fun HomeActionBar(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            Icons.Filled.QrCodeScanner,
-            contentDescription = "Photo Profil",
-            tint = Color.White,
-            modifier = Modifier
-                .size(48.dp)
-                .background(Blue, shape = RoundedCornerShape(20))
-                .border(2.dp, color = Color.LightGray, shape = RoundedCornerShape(20))
-                .padding(8.dp)
-        )
+        if (roleUser) {
+            Icon(
+                Icons.Filled.QrCodeScanner,
+                contentDescription = "Scan Code",
+                tint = Color.White,
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(Blue, shape = RoundedCornerShape(20))
+                    .border(2.dp, color = Color.LightGray, shape = RoundedCornerShape(20))
+                    .padding(8.dp)
+            )
+        }
     }
 }
 
