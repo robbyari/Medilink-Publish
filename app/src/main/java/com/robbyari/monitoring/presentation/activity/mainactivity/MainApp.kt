@@ -21,6 +21,7 @@ import com.robbyari.monitoring.presentation.screen.calibrationchecking.Calibrati
 import com.robbyari.monitoring.presentation.screen.daychecking.DayCheckingScreen
 import com.robbyari.monitoring.presentation.screen.home.HomeScreen
 import com.robbyari.monitoring.presentation.screen.monthchecking.MonthCheckingScreen
+import com.robbyari.monitoring.presentation.screen.repair.RepairScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +42,7 @@ fun MainApp(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Repair.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
@@ -101,6 +102,25 @@ fun MainApp(
             ) {
                 val id = it.arguments?.getString("id") ?: ""
                 CalibrationCheckingScreen(
+                    id = id,
+                    location = location,
+                    isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
+                    navigateBack = { navController.popBackStack() },
+                    backHandler = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+            composable(
+                route = Screen.Repair.route,
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) {
+                val id = it.arguments?.getString("id") ?: ""
+                RepairScreen(
                     id = id,
                     location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,

@@ -106,6 +106,7 @@ fun HomeContent(
 
     val coroutineScope = rememberCoroutineScope()
     val reportCheck by viewModel.reportProblemCheck.collectAsState()
+    val reportCheckCount = remember { mutableStateOf(0) }
     val dailyCheck by viewModel.dailyCheck.collectAsState()
     val dailyCheckCount = remember { mutableStateOf(0) }
     val monthlyCheck by viewModel.monthlyCheck.collectAsState()
@@ -153,7 +154,7 @@ fun HomeContent(
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.ReportProblem, title = "Laporan Rusak", total = 0)
+                    CardContent(icon = Icons.Filled.ReportProblem, title = "Laporan Rusak", total = reportCheckCount.value)
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
@@ -176,6 +177,7 @@ fun HomeContent(
                 is Response.Loading -> {}
                 is Response.Success -> {
                     val data = (reportCheck as Response.Success<List<ReportProblem>>).data
+                    reportCheckCount.value = data?.size ?: 0
 
                     if (data.isNullOrEmpty()) {
                         Box(
@@ -203,9 +205,12 @@ fun HomeContent(
                                 title = reportProblem.namaAlat!!,
                                 noSeri = reportProblem.noSeri!!,
                                 unit = reportProblem.unit!!,
-                                date = "09 Agu 2023 - 09:00",
-                                isScanDay = true,
-                                onScanDay = {
+                                date = convertFirebaseTimestampToString(reportProblem.createdAt!!),
+                                nameUser = reportProblem.nameUser!!,
+                                photoUser = reportProblem.photoUser!!,
+                                notes = reportProblem.notesUser!!,
+                                status = reportProblem.status!!,
+                                onScanRepaired = {
                                     coroutineScope.launch {
                                         navigateToDayChecking.value = true
                                         viewModel.startScan()
@@ -250,7 +255,7 @@ fun HomeContent(
                             val alat = data[index]
                             ItemContent(
                                 model = alat.photoUrl!!,
-                                title = "alat.namaAlat!! jnernr rirnir ",
+                                title = alat.namaAlat!!,
                                 noSeri = alat.noSeri!!,
                                 unit = alat.unit!!,
                                 date = convertFirebaseTimestampToString(alat.pengecekanHarian!!),

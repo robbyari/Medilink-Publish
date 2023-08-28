@@ -23,4 +23,5 @@ interface MonitoringRepository {
     suspend fun getUserDataStore(): User
     suspend fun addToReportProblem(idDocument: String, item: ReportProblem): Flow<Response<Boolean>>
     suspend fun getReportProblem(): Flow<Response<List<ReportProblem>>>
+    suspend fun getDetailReportProblem(id: String): Flow<Response<ReportProblem>>
 }

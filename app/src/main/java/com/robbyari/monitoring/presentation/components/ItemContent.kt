@@ -75,21 +75,21 @@ fun ItemContent(
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = noSeri,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.width(180.dp)
-                    )
-                    Text(
                         text = title,
                         fontSize = 16.sp,
                         color = Color.Black,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(180.dp)
+                        modifier = Modifier.width(170.dp)
+                    )
+                    Text(
+                        text = noSeri,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.width(170.dp)
                     )
                     Text(
                         text = unit,
@@ -97,7 +97,7 @@ fun ItemContent(
                         color = Color.Black,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.width(180.dp)
+                        modifier = Modifier.width(170.dp)
                     )
                 }
             }

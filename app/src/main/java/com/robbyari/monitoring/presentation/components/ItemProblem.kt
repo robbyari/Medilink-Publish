@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.robbyari.monitoring.presentation.theme.Blue
+import com.robbyari.monitoring.presentation.theme.Green
 
 @Composable
 fun ItemProblem(
@@ -38,17 +41,16 @@ fun ItemProblem(
     noSeri: String,
     unit: String,
     date: String,
-    isScanDay: Boolean = false,
-    isScanMonth: Boolean = false,
-    isScanCalibration: Boolean = false,
-    onScanDay: () -> Unit = {},
-    onScanMonth: () -> Unit = {},
-    onScanCalibration: () -> Unit = {},
+    status: Boolean,
+    showStatus: Boolean = false,
+    nameUser: String,
+    photoUser: String,
+    notes: String,
+    onScanRepaired: () -> Unit = {},
 ) {
     Box(
         modifier = Modifier
             .width(360.dp)
-            .height(140.dp)
             .clip(RoundedCornerShape(7))
             .background(Color.White)
     ) {
@@ -64,7 +66,7 @@ fun ItemProblem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
-                    model = model,
+                    model = photoUser,
                     contentDescription = "Total Alat",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -74,48 +76,71 @@ fun ItemProblem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
+                    if (showStatus) {
+                        Text(
+                            text = if (!status) "Belum Diperbaiki" else "Sudah Diperbaiki",
+                            fontSize = 16.sp,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .background(if (!status) Color.Red else Green, RoundedCornerShape(20))
+                                .padding(start = 3.dp, end = 3.dp)
+                        )
+                    }
+                    Text(
+                        text = nameUser,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.width(170.dp)
+                    )
                     Text(
                         text = noSeri,
                         fontSize = 16.sp,
                         color = Color.Black,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.width(180.dp)
+                        modifier = Modifier.width(170.dp)
                     )
                     Text(
-                        text = title,
+                        text = "$title ($unit)",
                         fontSize = 16.sp,
                         color = Color.Black,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(180.dp)
-                    )
-                    Text(
-                        text = unit,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.width(180.dp)
+                        modifier = Modifier.width(170.dp)
                     )
                 }
             }
             Divider(modifier = Modifier.padding(top = 8.dp))
             Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier.background(Blue)
             ) {
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Terakhir Dicek: $date",
+                    text = date,
                     fontSize = 16.sp,
-                    color = Color.Black,
+                    color = Color.White,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.width(350.dp)
+                    modifier = Modifier.fillMaxWidth()
                 )
+                Text(
+                    text = "\"$notes\"",
+                    fontSize = 16.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontStyle = FontStyle.Italic,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
         Row(
@@ -127,11 +152,7 @@ fun ItemProblem(
                 .align(Alignment.TopEnd)
                 .clip(RoundedCornerShape(12))
                 .clickable {
-                    when {
-                        isScanDay -> onScanDay()
-                        isScanMonth -> onScanMonth()
-                        isScanCalibration -> onScanCalibration()
-                    }
+                    onScanRepaired
                 },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center

@@ -51,6 +51,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.Timestamp
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.Checking
 import com.robbyari.monitoring.domain.model.ReportProblem
@@ -170,9 +171,14 @@ fun CalibrationCheckingScreen(
             noSeri = data.noSeri,
             unit = data.unit,
             nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
+            photoUser = userDataStore.photoUrl,
             createdAt = convertStringToFirebaseTimestamp(timestampString),
             divisi = userDataStore.divisi,
-            notes = notesReport,
+            notesUser = notesReport,
+            notesRepair = "",
+            photoTeknisi = "",
+            repairedAt = Timestamp(0, 0),
+            photoRepair = "",
             status = false,
             repairedBy = "",
         )

@@ -234,7 +234,7 @@ class MonitoringRepositoryImpl @Inject constructor(
                 .document(idDocument)
 
             documentRef.set(item).await()
-            updateDailyChecking(item.id ?: "", item.petugasHariIni ?: "",item.waktuPegecekan ?: Timestamp(0, 0))
+            updateDailyChecking(item.id ?: "", item.petugasHariIni ?: "", item.waktuPegecekan ?: Timestamp(0, 0))
             emit(Response.Success(true))
         } catch (e: Exception) {
             emit(Response.Failure(e))
@@ -338,6 +338,25 @@ class MonitoringRepositoryImpl @Inject constructor(
         awaitClose {
             listener.remove()
         }
+    }
+
+    override suspend fun getDetailReportProblem(id: String): Flow<Response<ReportProblem>> = flow {
+        emit(Response.Loading)
+        try {
+            val data = db.collection("ReportProblem")
+                .document(id).get().await()
+            val detail = data.toObject(ReportProblem::class.java)
+
+            if (detail != null) {
+                emit(Response.Success(detail))
+            } else {
+                emit(Response.Failure(Exception("Data tidak ditemukan")))
+            }
+
+        } catch (e: Exception) {
+            emit(Response.Failure(e))
+        }
+
     }
 
     private suspend fun getUser(email: String): User {

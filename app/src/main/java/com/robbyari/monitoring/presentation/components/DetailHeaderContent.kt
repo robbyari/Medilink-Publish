@@ -37,7 +37,6 @@ fun DetailHeaderContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 15.dp)
-
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp),
