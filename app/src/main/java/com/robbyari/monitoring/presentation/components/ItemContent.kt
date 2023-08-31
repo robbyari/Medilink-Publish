@@ -1,6 +1,5 @@
 package com.robbyari.monitoring.presentation.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,12 +7,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,26 +43,31 @@ fun ItemContent(
     isScanDay: Boolean = false,
     isScanMonth: Boolean = false,
     isScanCalibration: Boolean = false,
-    onScanDay: () -> Unit = {},
-    onScanMonth: () -> Unit = {},
-    onScanCalibration: () -> Unit = {},
+    navigateToDayChecking: () -> Unit = {},
+    navigateToMonthChecking: () -> Unit = {},
+    navigateToCalibrationChecking: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
-            .width(360.dp)
-            .height(140.dp)
-            .clip(RoundedCornerShape(7))
-            .background(Color.White)
+        modifier
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .clip(RoundedCornerShape(7))
                 .align(Alignment.Center)
-                .clickable { }
+                .clickable {
+                    when {
+                        isScanDay -> navigateToDayChecking()
+                        isScanMonth -> navigateToMonthChecking()
+                        isScanCalibration -> navigateToCalibrationChecking()
+                    }
+                }
         ) {
             Row(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
@@ -118,36 +125,16 @@ fun ItemContent(
                 )
             }
         }
-        Row(
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = "Icon Scan",
+            tint = Blue,
             modifier = Modifier
-                .padding(top = 24.dp, end = 16.dp)
-                .height(50.dp)
-                .width(90.dp)
-                .background(shape = RoundedCornerShape(8.dp), color = Blue)
+                .padding(top = 10.dp, end = 10.dp)
                 .align(Alignment.TopEnd)
-                .clip(RoundedCornerShape(12))
-                .clickable {
-                    when {
-                        isScanDay -> onScanDay()
-                        isScanMonth -> onScanMonth()
-                        isScanCalibration -> onScanCalibration()
-                    }
-                },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.QrCodeScanner,
-                contentDescription = "Icon Scan",
-                tint = Color.White,
-            )
-            Spacer(modifier = Modifier.width(5.dp))
-            Text(
-                text = "Scan",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-        }
+                .size(30.dp)
+                .clip(CircleShape)
+                .clickable {  }
+        )
     }
 }

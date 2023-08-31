@@ -2,7 +2,6 @@ package com.robbyari.monitoring.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,10 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,7 +32,6 @@ import com.robbyari.monitoring.presentation.theme.Green
 
 @Composable
 fun ItemProblem(
-    model: String,
     title: String,
     noSeri: String,
     unit: String,
@@ -46,20 +41,20 @@ fun ItemProblem(
     nameUser: String,
     photoUser: String,
     notes: String,
-    onScanRepaired: () -> Unit = {},
+    navigateToRepair: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
-            .width(360.dp)
-            .clip(RoundedCornerShape(7))
-            .background(Color.White)
+        modifier
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(7))
                 .align(Alignment.Center)
-                .clickable { }
+                .clickable {
+                    navigateToRepair()
+                }
         ) {
             Row(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
@@ -96,7 +91,7 @@ fun ItemProblem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(170.dp)
+                        modifier = Modifier.width(270.dp)
                     )
                     Text(
                         text = noSeri,
@@ -104,7 +99,7 @@ fun ItemProblem(
                         color = Color.Black,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.width(170.dp)
+                        modifier = Modifier.width(270.dp)
                     )
                     Text(
                         text = "$title ($unit)",
@@ -112,7 +107,7 @@ fun ItemProblem(
                         color = Color.Black,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.width(170.dp)
+                        modifier = Modifier.width(270.dp)
                     )
                 }
             }
@@ -138,37 +133,10 @@ fun ItemProblem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontStyle = FontStyle.Italic,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
-        }
-        Row(
-            modifier = Modifier
-                .padding(top = 24.dp, end = 16.dp)
-                .height(50.dp)
-                .width(90.dp)
-                .background(shape = RoundedCornerShape(8.dp), color = Blue)
-                .align(Alignment.TopEnd)
-                .clip(RoundedCornerShape(12))
-                .clickable {
-                    onScanRepaired
-                },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.QrCodeScanner,
-                contentDescription = "Icon Scan",
-                tint = Color.White,
-            )
-            Spacer(modifier = Modifier.width(5.dp))
-            Text(
-                text = "Scan",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
         }
     }
 }

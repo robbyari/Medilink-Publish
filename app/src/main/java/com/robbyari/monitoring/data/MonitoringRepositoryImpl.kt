@@ -359,6 +359,31 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     }
 
+    override suspend fun updateToReportProblem(item: ReportProblem): Flow<Response<Boolean>> = flow {
+        emit(Response.Loading)
+        try {
+            val doc = FirebaseFirestore.getInstance().collection("ReportProblem")
+            val id = item.idReport!!
+
+            val document = doc.document(id).get().await()
+
+            if (!document.exists()) {
+                Log.d("Kosong", "Tidak ada dokumen dengan idAlat: ${item.idReport}")
+            } else {
+                doc.document(id).update("status", item.status)
+                doc.document(id).update("repairedBy", item.repairedBy)
+                doc.document(id).update("repairedAt", item.repairedAt)
+                doc.document(id).update("photoTeknisi", item.photoTeknisi)
+                doc.document(id).update("photoRepair", item.photoRepair)
+                doc.document(id).update("notesRepair", item.notesRepair)
+                Log.d("Berhasil Update", "")
+                emit(Response.Success(true))
+            }
+        } catch (e: Exception) {
+            emit(Response.Failure(e))
+        }
+    }
+
     private suspend fun getUser(email: String): User {
         return try {
             val querySnapshot = db.collection("User")

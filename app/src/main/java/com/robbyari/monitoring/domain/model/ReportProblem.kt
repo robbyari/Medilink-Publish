@@ -3,6 +3,7 @@ package com.robbyari.monitoring.domain.model
 import com.google.firebase.Timestamp
 
 data class ReportProblem(
+    val idReport: String? = "",
     val idAlat: String? = "",
     val photoUrl: String? = "",
     val namaAlat: String? = "",

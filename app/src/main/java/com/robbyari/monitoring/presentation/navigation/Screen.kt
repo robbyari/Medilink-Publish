@@ -12,7 +12,10 @@ sealed class Screen(val route: String) {
     object CalibrationChecking : Screen("calibrationchecking/{id}") {
         fun createRoute(id: String?) = "calibrationchecking/${id}"
     }
-    object Repair : Screen("repair/{id}") {
-        fun createRoute(id: String?) = "repair/{id}"
+    object Repair : Screen("repair/{idReportProblem}") {
+        fun createRoute(idReportProblem: String?) = "repair/${idReportProblem}"
+    }
+    object All : Screen("all/{id}") {
+        fun createRoute(id: String?) = "all/${id}"
     }
 }

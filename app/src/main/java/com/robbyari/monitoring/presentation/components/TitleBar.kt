@@ -1,5 +1,6 @@
 package com.robbyari.monitoring.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +17,8 @@ import com.robbyari.monitoring.presentation.theme.Blue
 @Composable
 fun TitleBar(
     title: String,
-    detail: String
+    detail: String,
+    navigateToAllScreen: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp),
@@ -32,7 +34,8 @@ fun TitleBar(
             text = detail,
             fontSize = 16.sp,
             color = Blue,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.clickable { navigateToAllScreen() }
         )
     }
 }

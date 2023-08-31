@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -51,6 +52,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.Timestamp
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.Checking
@@ -62,6 +64,7 @@ import com.robbyari.monitoring.presentation.components.BottomSheet
 import com.robbyari.monitoring.presentation.components.DetailHeaderContent
 import com.robbyari.monitoring.presentation.components.ShowAlertDialog
 import com.robbyari.monitoring.presentation.theme.Blue
+import com.robbyari.monitoring.presentation.theme.LightBlue
 import com.robbyari.monitoring.utils.convertStringToFirebaseTimestamp
 import com.robbyari.monitoring.utils.createImageFile
 import com.robbyari.monitoring.utils.generateTimestamp
@@ -80,6 +83,12 @@ fun MonthCheckingScreen(
     navigateBack: () -> Unit,
     viewModel: MonthCheckingViewModel = hiltViewModel()
 ) {
+    val systemUiController = rememberSystemUiController()
+    SideEffect {
+        systemUiController.setSystemBarsColor(Color.White, darkIcons = true)
+        systemUiController.setNavigationBarColor(Color.Black)
+    }
+
     BackHandler(onBack = backHandler)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -162,6 +171,7 @@ fun MonthCheckingScreen(
         val timeStamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
         val data = (detailState as Response.Success<Alat>).data ?: Alat()
         val reportProblem = ReportProblem(
+            idReport = timeStamp,
             idAlat = data.id,
             photoUrl = data.photoUrl,
             namaAlat = data.namaAlat,
@@ -209,9 +219,8 @@ fun MonthCheckingScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(LightBlue),
     ) {
-
         when (detailState) {
             is Response.Loading -> {
                 Log.d("Loading", "")
@@ -264,6 +273,8 @@ fun MonthCheckingScreen(
             is Response.Failure -> {
                 Log.d("Failure", "")
             }
+
+            else -> {}
         }
 
         Row(

@@ -62,7 +62,7 @@ fun BodyContentChecking(
     Column(
         modifier = Modifier
             .background(LightBlue)
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(start = 16.dp, end = 16.dp),
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -224,7 +224,8 @@ fun BodyContentChecking(
 @Composable
 fun TextFieldNote(
     notes: String,
-    onQueryChange: (String) -> Unit
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -251,7 +252,7 @@ fun TextFieldNote(
                 focusManager.clearFocus()
             },
         ),
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(7))
             .height(180.dp)
             .fillMaxWidth()

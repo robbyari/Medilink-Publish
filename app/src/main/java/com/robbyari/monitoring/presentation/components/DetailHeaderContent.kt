@@ -1,5 +1,6 @@
 package com.robbyari.monitoring.presentation.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,7 +37,8 @@ fun DetailHeaderContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 15.dp)
+            .background(Color.White)
+            .padding(top = 16.dp)
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp),

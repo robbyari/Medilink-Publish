@@ -93,4 +93,6 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-permissions:0.23.1")
 
     implementation ("com.airbnb.android:lottie-compose:5.2.0")
+
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
 }
