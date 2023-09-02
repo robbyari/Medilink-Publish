@@ -33,13 +33,21 @@ class HomeViewModel @Inject constructor(
     private val _calibrationCheck = MutableStateFlow<Response<List<Alat>>>(Response.Loading)
     val calibrationCheck: StateFlow<Response<List<Alat>>> = _calibrationCheck
 
+    private val _countItemAlat = MutableStateFlow(0)
+    val countItemAlat: StateFlow<Int> = _countItemAlat
+
     private val _barcodeResult = MutableStateFlow<Response<String>>(Response.Loading)
     val barcodeResult: StateFlow<Response<String>> = _barcodeResult
 
     init {
         viewModelScope.launch {
             getUserDataStore()
+            countItemAlat()
         }
+    }
+
+    private suspend fun countItemAlat() {
+        _countItemAlat.value = repo.countItemAlat()
     }
 
     private suspend fun getUserDataStore() {

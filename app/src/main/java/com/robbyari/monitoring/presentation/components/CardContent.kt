@@ -2,6 +2,7 @@ package com.robbyari.monitoring.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -28,25 +27,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.robbyari.monitoring.R
 import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.presentation.theme.LightBlue
-import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 import com.robbyari.monitoring.utils.generateTimestamp
 
 @Composable
 fun CardContent(
     icon: ImageVector,
     title: String,
-    total: Int
+    total: Int,
+    navigateToAllScreen: () -> Unit,
 ) {
     Box(modifier = Modifier
         .width(270.dp)
         .height(180.dp)
         .clip(RoundedCornerShape(7))
+        .clickable { navigateToAllScreen() }
     ) {
         Image(
             painter = painterResource(id = R.drawable.bluebackground),
@@ -105,11 +104,4 @@ fun CardContent(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0x989a82)
-@Composable
-fun CardContentPreview() {
-    MonitoringTheme {
-        CardContent(icon = Icons.Default.Task, title = "Total Alat", total = 125)
-    }
-}
 

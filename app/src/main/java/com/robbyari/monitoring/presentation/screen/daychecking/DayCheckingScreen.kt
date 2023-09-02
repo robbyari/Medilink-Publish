@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -80,7 +79,6 @@ import java.util.Objects
 fun DayCheckingScreen(
     id: String?,
     location: String?,
-    backHandler: () -> Unit,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
     viewModel: DayCheckingViewModel = hiltViewModel()
@@ -90,7 +88,6 @@ fun DayCheckingScreen(
         systemUiController.setSystemBarsColor(Color.White, darkIcons = true)
         systemUiController.setNavigationBarColor(Color.Black)
     }
-    BackHandler(onBack = backHandler)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -243,7 +240,7 @@ fun DayCheckingScreen(
                     ) {
                         ActionBarDetail(
                             title = "Pengecekan Harian",
-                            navigateBack = backHandler,
+                            navigateBack = navigateBack,
                             modifier = Modifier
                         )
                         DetailHeaderContent(data = data, dayChecking = true)

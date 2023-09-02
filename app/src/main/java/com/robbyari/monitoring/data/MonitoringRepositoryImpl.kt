@@ -384,6 +384,41 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun countItemAlat(): Int {
+        return try {
+            val collectionRef = db.collection("Alat")
+            val snapshot = collectionRef.get().await()
+
+            snapshot.size()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0
+        }
+    }
+
+    override suspend fun getListAlat(): Flow<Response<List<Alat>>> = callbackFlow {
+        val query = db.collection("Alat")
+
+        val listener = query.addSnapshotListener { querySnapshot, exception ->
+            if (exception != null) {
+                trySend(Response.Failure(exception))
+                return@addSnapshotListener
+            }
+
+            val listAlat = mutableListOf<Alat>()
+            for (document in querySnapshot!!.documents) {
+                val alat = document.toObject(Alat::class.java)
+                alat?.let { listAlat.add(it) }
+            }
+
+            trySend(Response.Success(listAlat))
+        }
+
+        awaitClose {
+            listener.remove()
+        }
+    }
+
     private suspend fun getUser(email: String): User {
         return try {
             val querySnapshot = db.collection("User")

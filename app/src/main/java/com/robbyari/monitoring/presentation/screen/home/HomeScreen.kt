@@ -105,6 +105,7 @@ fun HomeContent(
     val monthlyCheckCount = remember { mutableStateOf(0) }
     val calibrationCheck by viewModel.calibrationCheck.collectAsState()
     val calibrationCheckCount = remember { mutableStateOf(0) }
+    val countItemAlat by viewModel.countItemAlat.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.fetchReportProblem()
@@ -142,23 +143,50 @@ fun HomeContent(
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.HomeRepairService, title = "Total Alat", total = 125)
+                    CardContent(
+                        icon = Icons.Filled.HomeRepairService,
+                        title = "Total Alat",
+                        total = countItemAlat,
+                        navigateToAllScreen = {
+                            navigateToAllScreen("alat")
+                        }
+                    )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.ReportProblem, title = "Laporan Rusak", total = reportCheckCount.value)
+                    CardContent(
+                        icon = Icons.Filled.ReportProblem,
+                        title = "Laporan Rusak",
+                        total = reportCheckCount.value,
+                        navigateToAllScreen = { navigateToAllScreen("report") }
+                    )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.WorkHistory, title = "Pengecekan Harian", total = dailyCheckCount.value)
+                    CardContent(
+                        icon = Icons.Filled.WorkHistory,
+                        title = "Pengecekan Harian",
+                        total = dailyCheckCount.value,
+                        navigateToAllScreen = {navigateToAllScreen("daychecking")}
+                    )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.WorkHistory, title = "Pemeliharaan Bulanan", total = monthlyCheckCount.value)
+                    CardContent(
+                        icon = Icons.Filled.WorkHistory,
+                        title = "Pemeliharaan Bulanan",
+                        total = monthlyCheckCount.value,
+                        navigateToAllScreen = {navigateToAllScreen("monthchecking")}
+                    )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
-                    CardContent(icon = Icons.Filled.WorkHistory, title = "Kalibrasi Alat", total = calibrationCheckCount.value)
+                    CardContent(
+                        icon = Icons.Filled.WorkHistory,
+                        title = "Kalibrasi Alat",
+                        total = calibrationCheckCount.value,
+                        navigateToAllScreen = {navigateToAllScreen("calibrationchecking")}
+                    )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
             }

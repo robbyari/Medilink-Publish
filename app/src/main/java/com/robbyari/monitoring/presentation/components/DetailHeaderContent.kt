@@ -138,7 +138,7 @@ fun DetailHeaderContent(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Divider(Modifier, 2.dp, color = Color.LightGray)
     }
 }

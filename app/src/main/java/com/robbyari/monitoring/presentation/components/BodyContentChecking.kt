@@ -65,7 +65,7 @@ fun BodyContentChecking(
             .fillMaxSize()
             .padding(start = 16.dp, end = 16.dp),
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.weight(0.5f)) {
                 Text(

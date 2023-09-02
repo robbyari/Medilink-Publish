@@ -80,13 +80,6 @@ fun MainApp(
                     location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
                     navigateBack = { navController.popBackStack() },
-                    backHandler = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Home.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
                 )
             }
             composable(
@@ -99,13 +92,6 @@ fun MainApp(
                     location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
                     navigateBack = { navController.popBackStack() },
-                    backHandler = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Home.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
                 )
             }
             composable(
@@ -117,14 +103,7 @@ fun MainApp(
                     id = id,
                     location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
-                    navigateBack = { navController.popBackStack() },
-                    backHandler = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Home.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
+                    navigateBack = { navController.popBackStack() }
                 )
             }
             composable(
@@ -138,14 +117,7 @@ fun MainApp(
                     idReportProblem = idReportProblem,
                     location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
-                    navigateBack = { navController.popBackStack() },
-                    backHandler = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Home.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
+                    navigateBack = { navController.popBackStack() }
                 )
             }
             composable(
@@ -154,10 +126,22 @@ fun MainApp(
                     navArgument("id") {type = NavType.StringType}
                 )
             ) {
-                val id = it.arguments?.getString("id")
+                val arg = it.arguments?.getString("id")
                 AllScreen(
-                    id = id,
-                    navigateBack = {navController.popBackStack()}
+                    id = arg,
+                    navigateBack = {navController.popBackStack()},
+                    navigateToDayChecking = { id ->
+                        navController.navigate(Screen.DayChecking.createRoute(id))
+                    },
+                    navigateToMonthChecking = { id ->
+                        navController.navigate(Screen.MonthChecking.createRoute(id))
+                    },
+                    navigateToCalibrationChecking = { id ->
+                        navController.navigate(Screen.CalibrationChecking.createRoute(id))
+                    },
+                    navigateToRepairScreen = { idReportProblem ->
+                        navController.navigate(Screen.Repair.createRoute(idReportProblem))
+                    }
                 )
             }
         }

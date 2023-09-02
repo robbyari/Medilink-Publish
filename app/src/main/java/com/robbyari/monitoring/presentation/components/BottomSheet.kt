@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.presentation.theme.Blue
@@ -45,6 +48,11 @@ fun BottomSheet(
     onQueryChange: (String) -> Unit,
     showLoading: Boolean
 ) {
+    val systemUiController = rememberSystemUiController()
+    SideEffect {
+        systemUiController.setNavigationBarColor(Color.Black, darkIcons = true)
+    }
+
     val modalBottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
     )
@@ -66,10 +74,11 @@ fun BottomSheet(
         Spacer(modifier = Modifier.height(20.dp))
         Column(
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp),
+                .fillMaxWidth(),
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             ) {
                 AsyncImage(
                     model = alat.photoUrl,
@@ -108,9 +117,13 @@ fun BottomSheet(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Divider(Modifier.fillMaxWidth(), 2.dp, Color.LightGray)
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
-                Modifier.fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp),
             ) {
                 Column(modifier = Modifier.weight(0.5f)) {
                     Text(
@@ -152,7 +165,7 @@ fun BottomSheet(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Column(modifier = Modifier) {
+            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                 Text(
                     text = "Divisi : ",
                     fontSize = 16.sp,
@@ -172,11 +185,12 @@ fun BottomSheet(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            TextFieldNote(notes, onQueryChange)
+            TextFieldNote(notes, onQueryChange, Modifier.padding(start = 16.dp, end = 16.dp))
             Spacer(modifier = Modifier.height(20.dp))
             TextButton(
                 onClick = submit,
                 modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp)
                     .height(50.dp)
                     .background(Blue, shape = RoundedCornerShape(20))
                     .fillMaxWidth()
@@ -195,7 +209,7 @@ fun BottomSheet(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(50.dp))
         }
     }
 }

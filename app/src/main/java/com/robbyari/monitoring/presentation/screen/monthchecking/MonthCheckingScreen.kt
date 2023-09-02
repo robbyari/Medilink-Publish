@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -78,7 +77,6 @@ import java.util.Objects
 fun MonthCheckingScreen(
     id: String?,
     location: String?,
-    backHandler: () -> Unit,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
     viewModel: MonthCheckingViewModel = hiltViewModel()
@@ -89,7 +87,6 @@ fun MonthCheckingScreen(
         systemUiController.setNavigationBarColor(Color.Black)
     }
 
-    BackHandler(onBack = backHandler)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -238,7 +235,7 @@ fun MonthCheckingScreen(
                     ) {
                         ActionBarDetail(
                             title = "Pengecekan Bulanan",
-                            navigateBack = backHandler,
+                            navigateBack = navigateBack,
                             modifier = Modifier
                         )
                         DetailHeaderContent(data = data, monthChecking = true)
@@ -274,7 +271,6 @@ fun MonthCheckingScreen(
                 Log.d("Failure", "")
             }
 
-            else -> {}
         }
 
         Row(

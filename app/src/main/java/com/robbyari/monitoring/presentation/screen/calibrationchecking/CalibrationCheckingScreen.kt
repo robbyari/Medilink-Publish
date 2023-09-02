@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -78,7 +77,6 @@ import java.util.Objects
 fun CalibrationCheckingScreen(
     id: String?,
     location: String?,
-    backHandler: () -> Unit,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
     viewModel: CalibrationCheckingViewModel = hiltViewModel()
@@ -89,7 +87,6 @@ fun CalibrationCheckingScreen(
         systemUiController.setNavigationBarColor(Color.Black)
     }
 
-    BackHandler(onBack = backHandler)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -241,7 +238,7 @@ fun CalibrationCheckingScreen(
                     ) {
                         ActionBarDetail(
                             title = "Pengecekan Kalibrasi",
-                            navigateBack = backHandler,
+                            navigateBack = navigateBack,
                             modifier = Modifier
                         )
                         DetailHeaderContent(data = data, calibrationChecking = true)
@@ -277,7 +274,6 @@ fun CalibrationCheckingScreen(
                 Log.d("Failure", "")
             }
 
-            else -> {}
         }
 
         Row(

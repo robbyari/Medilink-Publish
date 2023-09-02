@@ -25,4 +25,6 @@ interface MonitoringRepository {
     suspend fun getReportProblem(): Flow<Response<List<ReportProblem>>>
     suspend fun getDetailReportProblem(id: String): Flow<Response<ReportProblem>>
     suspend fun updateToReportProblem(item: ReportProblem): Flow<Response<Boolean>>
+    suspend fun countItemAlat(): Int
+    suspend fun getListAlat(): Flow<Response<List<Alat>>>
 }

@@ -28,6 +28,20 @@ class AllViewModel @Inject constructor(
     private val _calibrationCheck = MutableStateFlow<Response<List<Alat>>>(Response.Loading)
     val calibrationCheck: StateFlow<Response<List<Alat>>> = _calibrationCheck
 
+    private val _listAlat = MutableStateFlow<Response<List<Alat>>>(Response.Loading)
+    val listAlat: StateFlow<Response<List<Alat>>> = _listAlat
+
+    suspend fun fetchListAlat() {
+        _listAlat.value = Response.Loading
+        try {
+            repo.getListAlat().collectLatest {
+                _listAlat.emit(it)
+            }
+        } catch (e: Exception) {
+            _listAlat.emit(Response.Failure(e))
+        }
+    }
+
     suspend fun fetchReportProblem() {
         _reportProblemCheck.value = Response.Loading
         try {

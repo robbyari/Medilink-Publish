@@ -60,7 +60,6 @@ import java.util.Objects
 fun RepairScreen(
     idReportProblem: String?,
     location: String?,
-    backHandler: () -> Unit,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
     viewModel: RepairViewModel = hiltViewModel()
@@ -139,7 +138,7 @@ fun RepairScreen(
                     if (data != null) {
                         ActionBarDetail(
                             title = "Perbaikan",
-                            navigateBack = backHandler,
+                            navigateBack = navigateBack,
                             modifier = Modifier
                         )
                         Spacer(modifier = Modifier.height(16.dp).fillMaxWidth().background(Color.White))
