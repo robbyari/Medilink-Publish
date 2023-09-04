@@ -230,7 +230,7 @@ fun DayCheckingScreen(
 
             is Response.Success -> {
                 val data = (detailState as Response.Success<Alat>).data
-                totalItemCount.value = data?.listCek?.size ?: 0
+                totalItemCount.value = data?.listCekHarian?.size ?: 0
                 if (data != null) {
                     Column(
                         Modifier
@@ -249,7 +249,7 @@ fun DayCheckingScreen(
                             location = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
                             capturedImageUri = capturedImageUri.path?.isNotEmpty() == true,
                             painter = rememberAsyncImagePainter(capturedImageUri),
-                            listCek = data.listCek,
+                            listCek = data.listCekHarian,
                             nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
                             checkedItems = checkedItems,
                             checkedItemCount = checkedItemCount,
@@ -312,7 +312,7 @@ fun DayCheckingScreen(
                             val data = (detailState as Response.Success<Alat>).data
                             val photoUrl = viewModel.addImageToStorage(capturedImageUri)
                             val timeStamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
-                            val updatedListCek = data?.listCek?.toMutableMap() ?: mutableMapOf()
+                            val updatedListCek = data?.listCekHarian?.toMutableMap() ?: mutableMapOf()
                             for ((key, _) in updatedListCek) {
                                 if (checkedItems.containsKey(key)) {
                                     updatedListCek[key] = true

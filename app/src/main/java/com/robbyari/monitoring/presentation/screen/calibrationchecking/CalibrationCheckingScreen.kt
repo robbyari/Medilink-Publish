@@ -228,7 +228,7 @@ fun CalibrationCheckingScreen(
 
             is Response.Success -> {
                 val data = (detailState as Response.Success<Alat>).data
-                totalItemCount.value = data?.listCek?.size ?: 0
+                totalItemCount.value = data?.listCekKalibrasi?.size ?: 0
                 if (data != null) {
                     Column(
                         Modifier
@@ -247,7 +247,7 @@ fun CalibrationCheckingScreen(
                             location = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
                             capturedImageUri = capturedImageUri.path?.isNotEmpty() == true,
                             painter = rememberAsyncImagePainter(capturedImageUri),
-                            listCek = data.listCek,
+                            listCek = data.listCekKalibrasi,
                             nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
                             checkedItems = checkedItems,
                             checkedItemCount = checkedItemCount,
@@ -312,7 +312,7 @@ fun CalibrationCheckingScreen(
                             val data = (detailState as Response.Success<Alat>).data
                             val photoUrl = viewModel.addImageToStorage(capturedImageUri)
                             val timeStamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
-                            val updatedListCek = data?.listCek?.toMutableMap() ?: mutableMapOf()
+                            val updatedListCek = data?.listCekKalibrasi?.toMutableMap() ?: mutableMapOf()
                             for ((key, _) in updatedListCek) {
                                 if (checkedItems.containsKey(key)) {
                                     updatedListCek[key] = true

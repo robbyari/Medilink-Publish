@@ -21,6 +21,7 @@ import com.robbyari.monitoring.presentation.navigation.Screen
 import com.robbyari.monitoring.presentation.screen.all.AllScreen
 import com.robbyari.monitoring.presentation.screen.calibrationchecking.CalibrationCheckingScreen
 import com.robbyari.monitoring.presentation.screen.daychecking.DayCheckingScreen
+import com.robbyari.monitoring.presentation.screen.detailalat.DetailAlatScreen
 import com.robbyari.monitoring.presentation.screen.home.HomeScreen
 import com.robbyari.monitoring.presentation.screen.monthchecking.MonthCheckingScreen
 import com.robbyari.monitoring.presentation.screen.repair.RepairScreen
@@ -48,7 +49,7 @@ fun MainApp(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.DetailAlat.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
@@ -142,6 +143,18 @@ fun MainApp(
                     navigateToRepairScreen = { idReportProblem ->
                         navController.navigate(Screen.Repair.createRoute(idReportProblem))
                     }
+                )
+            }
+            composable(
+                route = Screen.DetailAlat.route,
+                arguments = listOf(
+                    navArgument("id") {type = NavType.StringType}
+                )
+            ) {
+                val arg = it.arguments?.getString("id")
+                DetailAlatScreen(
+                    id = arg,
+                    navigateBack = {navController.popBackStack()}
                 )
             }
         }
