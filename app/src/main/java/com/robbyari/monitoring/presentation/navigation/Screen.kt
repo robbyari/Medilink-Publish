@@ -3,6 +3,7 @@ package com.robbyari.monitoring.presentation.navigation
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Login : Screen("login")
+    object User : Screen("user")
     object DayChecking : Screen("daychecking/{id}") {
         fun createRoute(id: String?) = "daychecking/${id}"
     }
@@ -20,5 +21,8 @@ sealed class Screen(val route: String) {
     }
     object DetailAlat : Screen("detailalat/{id}") {
         fun createRoute(id: String?) = "detailalat/${id}"
+    }
+    object Report : Screen("report/{id}") {
+        fun createRoute(id: String?) = "report/${id}"
     }
 }

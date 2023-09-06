@@ -49,7 +49,7 @@ fun MainApp(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.DetailAlat.route,
+            startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
@@ -68,6 +68,9 @@ fun MainApp(
                     },
                     navigateToAllScreen = { id ->
                         navController.navigate(Screen.All.createRoute(id))
+                    },
+                    navigateToDetailAlat = { id ->
+                        navController.navigate(Screen.DetailAlat.createRoute(id))
                     }
                 )
             }
@@ -142,6 +145,9 @@ fun MainApp(
                     },
                     navigateToRepairScreen = { idReportProblem ->
                         navController.navigate(Screen.Repair.createRoute(idReportProblem))
+                    },
+                    navigateToDetailAlat = { id ->
+                        navController.navigate(Screen.DetailAlat.createRoute(id))
                     }
                 )
             }

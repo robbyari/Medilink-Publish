@@ -54,7 +54,7 @@ fun DetailAlatScreen(
     val detail by viewModel.detail.collectAsState()
 
     LaunchedEffect(id) {
-        viewModel.getDetail("Nu62hgGla4hD6qz")
+        viewModel.getDetail(id!!)
     }
 
     Column(
@@ -79,7 +79,6 @@ fun DetailAlatScreen(
                         .background(Color.White)
                 )
                 DetailAlatContent(
-                    id = id,
                     item = item!!
                 )
             }
@@ -91,8 +90,7 @@ fun DetailAlatScreen(
 
 @Composable
 fun DetailAlatContent(
-    id: String?,
-    item: Alat,
+    item: Alat
 ) {
     Column(
         modifier = Modifier.fillMaxSize()

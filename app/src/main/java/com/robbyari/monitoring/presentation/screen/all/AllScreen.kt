@@ -49,6 +49,7 @@ fun AllScreen(
     navigateToMonthChecking: (String) -> Unit,
     navigateToCalibrationChecking: (String) -> Unit,
     navigateToRepairScreen: (String) -> Unit,
+    navigateToDetailAlat: (String) -> Unit,
     viewModel: AllViewModel = hiltViewModel()
 ) {
     val systemUiController = rememberSystemUiController()
@@ -214,6 +215,7 @@ fun AllScreen(
                                     navigateToDayChecking = {
                                         navigateToDayChecking(alat.id!!)
                                     },
+                                    navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
                                     modifier = Modifier
                                         .padding(start = 16.dp, end = 16.dp)
                                         .fillMaxWidth()
@@ -282,6 +284,7 @@ fun AllScreen(
                                     navigateToMonthChecking = {
                                         navigateToMonthChecking(alat.id!!)
                                     },
+                                    navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
                                     modifier = Modifier
                                         .padding(start = 16.dp, end = 16.dp)
                                         .fillMaxWidth()
@@ -348,6 +351,7 @@ fun AllScreen(
                                     navigateToCalibrationChecking = {
                                         navigateToCalibrationChecking(alat.id!!)
                                     },
+                                    navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
                                     modifier = Modifier
                                         .padding(start = 16.dp, end = 16.dp)
                                         .fillMaxWidth()
@@ -409,7 +413,7 @@ fun AllScreen(
                                     title = alat.namaAlat!!,
                                     noSeri = alat.noSeri!!,
                                     unit = alat.unit!!,
-                                    navigateToDetailAlat = {},
+                                    navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
                                     modifier = Modifier
                                         .padding(start = 16.dp, end = 16.dp)
                                         .fillMaxWidth()

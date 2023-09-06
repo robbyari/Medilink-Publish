@@ -2,11 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-feature android:name="android.hardware.camera.any"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera.any" />
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:name=".MonitoringJetpackComposeApp"
@@ -22,30 +23,29 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/SplashScreenTheme"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-
         <activity
             android:name=".presentation.activity.mainactivity.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Monitoring">
-        </activity>
-
+            android:theme="@style/Theme.Monitoring"></activity>
         <activity
             android:name=".presentation.activity.loginactivity.LoginActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Monitoring">
-        </activity>
-
+            android:theme="@style/Theme.Monitoring"></activity>
+        <activity
+            android:name=".presentation.activity.useractivity.UserActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Monitoring"></activity>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.robbyari.monitoring.provider"
@@ -58,8 +58,7 @@
 
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="barcode_ui"/>
-
+            android:value="barcode_ui" />
     </application>
 
 </manifest>

@@ -177,6 +177,7 @@ fun CalibrationCheckingScreen(
             namaAlat = data.namaAlat,
             noSeri = data.noSeri,
             unit = data.unit,
+            idUser = userDataStore.uid,
             nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
             photoUser = userDataStore.photoUrl,
             createdAt = convertStringToFirebaseTimestamp(timestampString),

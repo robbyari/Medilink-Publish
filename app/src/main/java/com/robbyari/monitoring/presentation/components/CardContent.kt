@@ -2,7 +2,6 @@ package com.robbyari.monitoring.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,13 +38,12 @@ fun CardContent(
     icon: ImageVector,
     title: String,
     total: Int,
-    navigateToAllScreen: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Box(modifier = Modifier
+    Box(modifier = modifier
         .width(270.dp)
         .height(180.dp)
         .clip(RoundedCornerShape(7))
-        .clickable { navigateToAllScreen() }
     ) {
         Image(
             painter = painterResource(id = R.drawable.bluebackground),

@@ -2,6 +2,7 @@ package com.robbyari.monitoring.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,19 +25,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.presentation.theme.Blue
-import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 
 @Composable
 fun HomeActionBar(
     nameDataStore: String,
     user: User,
-    roleUser: Boolean = false
+    roleUser: Boolean = false,
+    onClickScan: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -89,6 +89,8 @@ fun HomeActionBar(
                 tint = Color.White,
                 modifier = Modifier
                     .size(48.dp)
+                    .clip(RoundedCornerShape(20))
+                    .clickable { onClickScan() }
                     .background(Blue, shape = RoundedCornerShape(20))
                     .border(2.dp, color = Color.LightGray, shape = RoundedCornerShape(20))
                     .padding(8.dp)
@@ -97,10 +99,3 @@ fun HomeActionBar(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = false)
-@Composable
-fun HomeActionBarPreview() {
-    MonitoringTheme {
-      //  HomeActionBar(user = User())
-    }
-}

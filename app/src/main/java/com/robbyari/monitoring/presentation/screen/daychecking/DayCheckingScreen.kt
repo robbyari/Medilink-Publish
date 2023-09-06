@@ -45,7 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -65,7 +64,6 @@ import com.robbyari.monitoring.presentation.components.DetailHeaderContent
 import com.robbyari.monitoring.presentation.components.ShowAlertDialog
 import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.presentation.theme.LightBlue
-import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 import com.robbyari.monitoring.utils.convertStringToFirebaseTimestamp
 import com.robbyari.monitoring.utils.createImageFile
 import com.robbyari.monitoring.utils.generateTimestamp
@@ -179,6 +177,7 @@ fun DayCheckingScreen(
             namaAlat = data.namaAlat,
             noSeri = data.noSeri,
             unit = data.unit,
+            idUser = userDataStore.uid,
             nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
             photoUser = userDataStore.photoUrl,
             createdAt = convertStringToFirebaseTimestamp(timestampString),
@@ -363,11 +362,3 @@ fun DayCheckingScreen(
     }
 }
 
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun DayCheckingScreenPreview() {
-    MonitoringTheme {
-
-    }
-}

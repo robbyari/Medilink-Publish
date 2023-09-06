@@ -1,5 +1,6 @@
 package com.robbyari.monitoring.presentation.screen.login
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,15 +38,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.robbyari.monitoring.R
+import com.robbyari.monitoring.data.MonitoringRepositoryImpl.Companion.KEY_ROLE
+import com.robbyari.monitoring.di.userDataStore
+import com.robbyari.monitoring.presentation.activity.useractivity.UserActivity
 import com.robbyari.monitoring.presentation.components.TextFieldWithIcons
 import com.robbyari.monitoring.presentation.theme.Blue
-import com.robbyari.monitoring.presentation.theme.MonitoringTheme
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @Composable
@@ -141,10 +146,14 @@ fun LoginScreen(
                 } else {
                     coroutineScope.launch {
                         val isLoginSuccessful = viewModel.loginUser(email, password)
-                        if (isLoginSuccessful) {
-                            navigateToHome()
-                        } else {
-                            Toast.makeText(context, "User tidak ditemukan", Toast.LENGTH_SHORT).show()
+                        val dataStore: DataStore<Preferences> = context.userDataStore
+                        val dataStoreValue = dataStore.data.first()
+                        val intent = Intent(context, UserActivity::class.java)
+
+                        when {
+                            isLoginSuccessful && dataStoreValue[KEY_ROLE] == "Teknisi" -> {navigateToHome()}
+                            isLoginSuccessful && dataStoreValue[KEY_ROLE] == "User" -> {context.startActivity(intent)}
+                            else -> {Toast.makeText(context, "User tidak ditemukan", Toast.LENGTH_SHORT).show()}
                         }
                         isLoading = false
                     }
@@ -193,13 +202,5 @@ fun LoginScreen(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoginScreenPreview() {
-    MonitoringTheme {
-       // LoginScreen()
     }
 }

@@ -46,6 +46,7 @@ fun ItemContent(
     navigateToDayChecking: () -> Unit = {},
     navigateToMonthChecking: () -> Unit = {},
     navigateToCalibrationChecking: () -> Unit = {},
+    navigateToDetailAlat: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -132,9 +133,9 @@ fun ItemContent(
             modifier = Modifier
                 .padding(top = 10.dp, end = 10.dp)
                 .align(Alignment.TopEnd)
-                .size(30.dp)
+                .size(33.dp)
                 .clip(CircleShape)
-                .clickable {  }
+                .clickable { navigateToDetailAlat() }
         )
     }
 }

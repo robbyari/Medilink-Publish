@@ -9,6 +9,7 @@ data class ReportProblem(
     val namaAlat: String? = "",
     val noSeri: String? = "",
     val unit: String? = "",
+    val idUser: String? = "",
     val nameUser: String? = "",
     val photoUser: String? = "",
     val createdAt: Timestamp? = Timestamp(0, 0),

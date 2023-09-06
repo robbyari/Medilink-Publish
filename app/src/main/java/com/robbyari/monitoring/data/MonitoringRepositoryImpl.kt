@@ -76,6 +76,7 @@ class MonitoringRepositoryImpl @Inject constructor(
                 preferences[KEY_PHOTO_URL] = user.photoUrl ?: ""
                 preferences[KEY_ROLE] = user.role ?: ""
                 preferences[KEY_DIVISI] = user.divisi ?: ""
+                preferences[KEY_UID] = user.uid ?: ""
             }
             Response.Success(Unit)
         } catch (e: Exception) {
@@ -286,6 +287,7 @@ class MonitoringRepositoryImpl @Inject constructor(
                     val photo = preferences[KEY_PHOTO_URL]
                     val role = preferences[KEY_ROLE]
                     val divisi = preferences[KEY_DIVISI]
+                    val uid = preferences[KEY_UID]
 
                     User(
                         firstName = firstname,
@@ -293,7 +295,8 @@ class MonitoringRepositoryImpl @Inject constructor(
                         email = email,
                         photoUrl = photo,
                         role = role,
-                        divisi = divisi
+                        divisi = divisi,
+                        uid = uid
                     )
                 }
             val value = flow.firstOrNull() ?: User()

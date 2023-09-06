@@ -10,9 +10,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.lifecycleScope
 import com.robbyari.monitoring.data.MonitoringRepositoryImpl.Companion.KEY_EMAIL
+import com.robbyari.monitoring.data.MonitoringRepositoryImpl.Companion.KEY_ROLE
 import com.robbyari.monitoring.di.userDataStore
 import com.robbyari.monitoring.presentation.activity.loginactivity.LoginActivity
 import com.robbyari.monitoring.presentation.activity.mainactivity.MainActivity
+import com.robbyari.monitoring.presentation.activity.useractivity.UserActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -33,11 +35,12 @@ class SplashActivity : ComponentActivity() {
             val dataStore: DataStore<Preferences> = applicationContext.userDataStore
             val dataStoreValue = dataStore.data.first()
 
-            val intent = if (dataStoreValue[KEY_EMAIL] != null) {
-                Intent(this@SplashActivity, MainActivity::class.java)
-            } else {
-                Intent(this@SplashActivity, LoginActivity::class.java)
+            val intent = when {
+                dataStoreValue[KEY_EMAIL] != null && dataStoreValue[KEY_ROLE] == "Teknisi" -> Intent(this@SplashActivity, MainActivity::class.java)
+                dataStoreValue[KEY_EMAIL] != null && dataStoreValue[KEY_ROLE] == "User" -> Intent(this@SplashActivity, UserActivity::class.java)
+                else -> Intent(this@SplashActivity, LoginActivity::class.java)
             }
+
             startActivity(intent)
             finish()
         }

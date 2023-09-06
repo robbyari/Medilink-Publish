@@ -2,6 +2,7 @@ package com.robbyari.monitoring.presentation.screen.home
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -56,6 +57,7 @@ fun HomeScreen(
     navigateToMonthChecking: (String) -> Unit,
     navigateToCalibrationChecking: (String) -> Unit,
     navigateToRepairScreen: (String) -> Unit,
+    navigateToDetailAlat: (String) -> Unit,
     navigateToAllScreen: (String) -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
@@ -74,26 +76,26 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HomeContent(
-            nameDataStore = "${userDataStore.firstName} ${userDataStore.lastName}",
             user = userDataStore,
             navigateToDayChecking = {navigateToDayChecking(it)},
             navigateToMonthChecking = {navigateToMonthChecking(it)},
             navigateToCalibrationChecking = {navigateToCalibrationChecking(it)},
             navigateToRepairScreen = {navigateToRepairScreen(it)},
-            navigateToAllScreen = {navigateToAllScreen(it)}
+            navigateToAllScreen = {navigateToAllScreen(it)},
+            navigateToDetailAlat = {navigateToDetailAlat(it)}
         )
     }
 }
 
 @Composable
 fun HomeContent(
-    nameDataStore: String,
     user: User,
     navigateToDayChecking: (String) -> Unit,
     navigateToMonthChecking: (String) -> Unit,
     navigateToCalibrationChecking: (String) -> Unit,
     navigateToRepairScreen: (String) -> Unit,
     navigateToAllScreen: (String) -> Unit,
+    navigateToDetailAlat: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
 
@@ -125,7 +127,7 @@ fun HomeContent(
 
     Column {
         Spacer(modifier = Modifier.height(6.dp))
-        HomeActionBar(nameDataStore = nameDataStore, user = user)
+        HomeActionBar(nameDataStore = "${user.firstName} ${user.lastName}", user = user)
         Spacer(modifier = Modifier.height(16.dp))
         Divider(thickness = 3.dp, color = Color.LightGray)
         Column(
@@ -147,9 +149,7 @@ fun HomeContent(
                         icon = Icons.Filled.HomeRepairService,
                         title = "Total Alat",
                         total = countItemAlat,
-                        navigateToAllScreen = {
-                            navigateToAllScreen("alat")
-                        }
+                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("alat") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
@@ -158,7 +158,7 @@ fun HomeContent(
                         icon = Icons.Filled.ReportProblem,
                         title = "Laporan Rusak",
                         total = reportCheckCount.value,
-                        navigateToAllScreen = { navigateToAllScreen("report") }
+                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("report") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
@@ -167,7 +167,7 @@ fun HomeContent(
                         icon = Icons.Filled.WorkHistory,
                         title = "Pengecekan Harian",
                         total = dailyCheckCount.value,
-                        navigateToAllScreen = {navigateToAllScreen("daychecking")}
+                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("daychecking") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
@@ -176,7 +176,7 @@ fun HomeContent(
                         icon = Icons.Filled.WorkHistory,
                         title = "Pemeliharaan Bulanan",
                         total = monthlyCheckCount.value,
-                        navigateToAllScreen = {navigateToAllScreen("monthchecking")}
+                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("monthchecking") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
@@ -185,7 +185,7 @@ fun HomeContent(
                         icon = Icons.Filled.WorkHistory,
                         title = "Kalibrasi Alat",
                         total = calibrationCheckCount.value,
-                        navigateToAllScreen = {navigateToAllScreen("calibrationchecking")}
+                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("calibrationchecking") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
@@ -287,6 +287,7 @@ fun HomeContent(
                                 navigateToDayChecking = {
                                     navigateToDayChecking(alat.id!!)
                                 },
+                                navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
                                 modifier = Modifier
                                     .width(screenWidth)
                                     .padding(
@@ -344,6 +345,7 @@ fun HomeContent(
                                 navigateToMonthChecking = {
                                     navigateToMonthChecking(alat.id!!)
                                 },
+                                navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
                                 modifier = Modifier
                                     .width(screenWidth)
                                     .padding(
@@ -401,6 +403,7 @@ fun HomeContent(
                                 navigateToCalibrationChecking = {
                                     navigateToCalibrationChecking(alat.id!!)
                                 },
+                                navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
                                 modifier = Modifier
                                     .width(screenWidth)
                                     .padding(
