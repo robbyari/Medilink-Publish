@@ -18,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.robbyari.monitoring.presentation.navigation.Screen
+import com.robbyari.monitoring.presentation.screen.account.AccountScreen
 import com.robbyari.monitoring.presentation.screen.report.ReportScreen
 import com.robbyari.monitoring.presentation.screen.user.UserScreen
 
@@ -43,16 +44,33 @@ fun UserApp(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.User.route) {
-                UserScreen()
+                UserScreen(
+                    navigateToReportScreen = { id ->
+                        navController.navigate(Screen.Report.createRoute(id))
+                    },
+                    navigateToAccountScreen = { id ->
+                        navController.navigate(Screen.Account.createRoute(id))
+                    }
+                )
             }
             composable(
                 route = Screen.Report.route,
                 arguments = listOf(navArgument("id") { type = NavType.StringType })
             ) {
-                val arg = it.arguments?.getString("id") ?: ""
+                val arg = it.arguments?.getString("id")
                 ReportScreen(
                     id = arg,
                     navigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(
+                route = Screen.Account.route,
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) {
+                val arg = it.arguments?.getString("id")
+                AccountScreen(
+                    id = arg,
+                    navigateBack = { navController.popBackStack() },
                 )
             }
         }

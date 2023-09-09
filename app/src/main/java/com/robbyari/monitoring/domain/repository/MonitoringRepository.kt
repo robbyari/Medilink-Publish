@@ -27,4 +27,8 @@ interface MonitoringRepository {
     suspend fun updateToReportProblem(item: ReportProblem): Flow<Response<Boolean>>
     suspend fun countItemAlat(): Int
     suspend fun getListAlat(): Flow<Response<List<Alat>>>
+    suspend fun changeEmail(uid: String, emailUpdate: String): Boolean
+    suspend fun getUserDatabase(uid: String): Flow<Response<User>>
+    suspend fun changePassword(uid: String, passwordUpdate: String): Boolean
+    suspend fun resetDataStore() : Boolean
 }

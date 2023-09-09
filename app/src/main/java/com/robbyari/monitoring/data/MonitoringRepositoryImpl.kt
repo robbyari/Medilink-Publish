@@ -68,7 +68,7 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     override suspend fun setUser(email: String): Response<Unit> {
         return try {
-            val user = getUser(email)
+            val user = checkUser(email)
             userDataStorePreferences.edit { preferences ->
                 preferences[KEY_EMAIL] = email
                 preferences[KEY_FIRSTNAME] = user.firstName ?: ""
@@ -422,7 +422,92 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun getUser(email: String): User {
+    override suspend fun changeEmail(uid: String, emailUpdate: String): Boolean {
+        return try {
+            val doc = db.collection("User")
+            val documentSnapshot = doc.document(uid).get().await()
+
+            if (documentSnapshot.exists()) {
+                doc.document(uid).update("email", emailUpdate)
+                userDataStorePreferences.edit { preferences ->
+                    preferences[KEY_EMAIL] = emailUpdate
+                }
+                documentSnapshot.exists()
+            } else {
+                Log.d("Kosong", "")
+                false
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    override suspend fun getUserDatabase(uid: String): Flow<Response<User>> = callbackFlow {
+        val query = db.collection("User").document(uid)
+
+        val listener = query.addSnapshotListener { querySnapshot, exception ->
+            if (exception != null) {
+                trySend(Response.Failure(exception))
+                return@addSnapshotListener
+            }
+
+            if (querySnapshot != null) {
+                val document = querySnapshot.toObject(User::class.java)
+                if (document != null) {
+                    trySend(Response.Success(document))
+                } else {
+                    trySend(Response.Failure(Exception("Document conversion failed")))
+                }
+            }
+        }
+
+        awaitClose {
+            listener.remove()
+        }
+
+    }
+
+    override suspend fun changePassword(uid: String, passwordUpdate: String): Boolean {
+        return try {
+            val doc = db.collection("User")
+            val documentSnapshot = doc.document(uid).get().await()
+
+            if (documentSnapshot.exists()) {
+                doc.document(uid).update("password", passwordUpdate)
+
+                documentSnapshot.exists()
+            } else {
+                Log.d("Kosong", "")
+                false
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    override suspend fun resetDataStore() : Boolean {
+        return try {
+            userDataStorePreferences.edit { preferences ->
+                preferences[KEY_EMAIL] = ""
+                preferences[KEY_FIRSTNAME] = ""
+                preferences[KEY_LASTNAME] = ""
+                preferences[KEY_PHOTO_URL] = ""
+                preferences[KEY_ROLE] = ""
+                preferences[KEY_DIVISI] = ""
+                preferences[KEY_UID] = ""
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    private suspend fun checkUser(email: String): User {
         return try {
             val querySnapshot = db.collection("User")
                 .whereEqualTo("email", email)
@@ -446,15 +531,14 @@ class MonitoringRepositoryImpl @Inject constructor(
             val doc = FirebaseFirestore.getInstance().collection("Alat")
             val documentSnapshot = doc.document(id).get().await()
 
-            if (!documentSnapshot.exists()) {
-                Log.d("Kosong", "")
-            }
-
             if (documentSnapshot.exists()) {
                 doc.document(id).update("pengecekanHarian", timestamp)
                 doc.document(id).update("terakhirDicekOleh", petugasHariIni)
                 Log.d("Berhasil Update", "")
+            } else {
+                Log.d("Kosong", "")
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -465,15 +549,14 @@ class MonitoringRepositoryImpl @Inject constructor(
             val doc = FirebaseFirestore.getInstance().collection("Alat")
             val documentSnapshot = doc.document(id).get().await()
 
-            if (!documentSnapshot.exists()) {
-                Log.d("Kosong", "")
-            }
-
             if (documentSnapshot.exists()) {
                 doc.document(id).update("pengecekanBulanan", timestamp)
                 doc.document(id).update("terakhirDicekOleh", petugasHariIni)
                 Log.d("Berhasil Update", "")
+            } else {
+                Log.d("Kosong", "")
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -484,15 +567,15 @@ class MonitoringRepositoryImpl @Inject constructor(
             val doc = FirebaseFirestore.getInstance().collection("Alat")
             val documentSnapshot = doc.document(id).get().await()
 
-            if (!documentSnapshot.exists()) {
-                Log.d("Kosong", "")
-            }
 
             if (documentSnapshot.exists()) {
                 doc.document(id).update("kalibrasi", timestamp)
                 doc.document(id).update("terakhirDicekOleh", petugasHariIni)
                 Log.d("Berhasil Update", "")
+            } else {
+                Log.d("Kosong", "")
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -33,7 +33,7 @@ fun ActionBarDetail(
         modifier = modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

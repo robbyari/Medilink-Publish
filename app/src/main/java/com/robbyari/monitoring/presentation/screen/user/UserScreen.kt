@@ -2,6 +2,7 @@ package com.robbyari.monitoring.presentation.screen.user
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +15,11 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.HomeRepairService
-import androidx.compose.material.icons.filled.ReportProblem
-import androidx.compose.material.icons.filled.WorkHistory
+import androidx.compose.material.icons.filled.HourglassFull
+import androidx.compose.material.icons.filled.Summarize
+import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,9 +52,13 @@ import com.robbyari.monitoring.presentation.components.HomeActionBar
 import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.presentation.theme.LightBlue
 import com.robbyari.monitoring.utils.convertFirebaseTimestampToString
+import com.valentinilk.shimmer.shimmer
+import kotlinx.coroutines.launch
 
 @Composable
 fun UserScreen(
+    navigateToReportScreen: (String) -> Unit,
+    navigateToAccountScreen: (String) -> Unit,
     viewModel: UserViewModel = hiltViewModel()
 ) {
     val systemUiController = rememberSystemUiController()
@@ -68,7 +75,7 @@ fun UserScreen(
             is Response.Success -> {
                 val scannedValue = (barcodeResult as Response.Success<String>).data
                 if (scannedValue != null) {
-
+                    navigateToReportScreen(scannedValue)
                 }
             }
 
@@ -83,7 +90,8 @@ fun UserScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         UserContent(
-            user = userDataStore
+            user = userDataStore,
+            navigateToAccountScreen = { navigateToAccountScreen(it) }
         )
     }
 }
@@ -92,24 +100,28 @@ fun UserScreen(
 @Composable
 fun UserContent(
     user: User,
+    navigateToAccountScreen: (String) -> Unit,
     viewModel: UserViewModel = hiltViewModel()
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val reportProblem by viewModel.reportProblem.collectAsState()
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("emptybox.json"))
     val reportCount = remember { mutableStateOf(0) }
     val reportActiveCount = remember { mutableStateOf(0) }
     val reportDoneCount = remember { mutableStateOf(0) }
 
-    Spacer(modifier = Modifier.height(6.dp))
     HomeActionBar(
         nameDataStore = "${user.firstName} ${user.lastName}",
         user = user,
         roleUser = true,
-        onClickScan = {}
+        onClickScan = {
+            coroutineScope.launch {
+                viewModel.startScan()
+            }
+        },
+        navigateToAccountScreen = { navigateToAccountScreen(user.uid!!) }
     )
-    Spacer(modifier = Modifier.height(16.dp))
     Divider(thickness = 3.dp, color = Color.LightGray)
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -126,15 +138,15 @@ fun UserContent(
                 }
                 item {
                     CardContent(
-                        icon = Icons.Filled.HomeRepairService,
-                        title = "Laporan Aktif",
+                        icon = Icons.Filled.HourglassFull,
+                        title = "Laporan Saya",
                         total = reportActiveCount.value,
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
                     CardContent(
-                        icon = Icons.Filled.ReportProblem,
+                        icon = Icons.Filled.Task,
                         title = "Laporan Selesai",
                         total = reportDoneCount.value,
                     )
@@ -142,7 +154,7 @@ fun UserContent(
                 }
                 item {
                     CardContent(
-                        icon = Icons.Filled.WorkHistory,
+                        icon = Icons.Filled.Summarize,
                         title = "Total Laporan",
                         total = reportCount.value,
                     )
@@ -174,7 +186,19 @@ fun UserContent(
             }
         }
         when (reportProblem) {
-            is Response.Loading -> {}
+            is Response.Loading -> {
+                items(5) {
+                    Box(
+                        Modifier
+                            .shimmer()
+                            .padding(start = 16.dp, end = 16.dp)
+                            .background(Color.Gray, shape = RoundedCornerShape(7))
+                            .height(130.dp)
+                            .fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
             is Response.Success -> {
                 val data = (reportProblem as Response.Success<List<ReportProblem>>).data
 
@@ -206,7 +230,8 @@ fun UserContent(
                         photoAlat = item.photoUrl!!,
                         notes = item.notesUser!!,
                         status = item.status!!,
-                        showStatus = true
+                        showStatus = true,
+                        repairedBy = item.repairedBy!!
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }

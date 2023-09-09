@@ -97,4 +97,5 @@ dependencies {
     implementation ("com.airbnb.android:lottie-compose:5.2.0")
 
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
+    implementation ("com.valentinilk.shimmer:compose-shimmer:1.0.5")
 }
