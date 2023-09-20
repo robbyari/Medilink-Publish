@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.presentation.theme.Green
 import com.valentinilk.shimmer.shimmer
 
@@ -72,13 +76,16 @@ fun HistoryContent(
 
     ) {
         Row(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp),
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
                 if (showStatus) {
                     Text(
-                        text = if (!status) "Belum Diperbaiki" else "Sudah Diperbaiki",
+                        text = if (!status) stringResource(R.string.belum_diperbaiki) else stringResource(R.string.sudah_diperbaiki),
                         fontSize = 16.sp,
                         color = Color.White,
                         maxLines = 1,
@@ -94,9 +101,9 @@ fun HistoryContent(
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Start,
-                    maxLines = 1,
+                    maxLines = if (collapse.value) 10 else 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.width(270.dp)
+                    modifier = Modifier.width(LocalConfiguration.current.screenHeightDp.dp * 0.3f)
                 )
                 Text(
                     text = "$title ($unit)",
@@ -104,28 +111,25 @@ fun HistoryContent(
                     color = Color.Black,
                     maxLines = if (collapse.value) 10 else 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.width(270.dp)
+                    modifier = Modifier.width(LocalConfiguration.current.screenHeightDp.dp * 0.3f)
                 )
                 if (collapse.value) {
                     Text(
-                        text = "Diperbaiki oleh: " + if (repairedBy.isNotEmpty()) repairedBy else "-",
+                        text = stringResource(R.string.diperbaiki_oleh) + repairedBy.ifEmpty { "-" },
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .width(270.dp)
-                            .fillMaxWidth()
+                        modifier = Modifier.width(LocalConfiguration.current.screenHeightDp.dp * 0.3f)
                     )
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Box(modifier = Modifier) {
+            Box(modifier = Modifier.size(55.dp)) {
                 when (state) {
                     is AsyncImagePainter.State.Error -> {
                         Icon(
                             Icons.Default.BrokenImage,
-                            contentDescription = "Photo alat",
+                            contentDescription = stringResource(id = R.string.photo_alat),
                             tint = Color.White,
                             modifier = Modifier
                                 .size(55.dp)
@@ -137,7 +141,7 @@ fun HistoryContent(
                     is AsyncImagePainter.State.Loading -> {
                         Icon(
                             Icons.Default.ImagesearchRoller,
-                            contentDescription = "Photo alat",
+                            contentDescription = stringResource(id = R.string.photo_alat),
                             tint = Color.White,
                             modifier = Modifier
                                 .shimmer()
@@ -150,7 +154,7 @@ fun HistoryContent(
                 }
                 Image(
                     painter = painter,
-                    contentDescription = "Photo alat",
+                    contentDescription = stringResource(id = R.string.photo_alat),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(55.dp)

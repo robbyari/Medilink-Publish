@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,6 +27,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.presentation.theme.Blue
 
 
@@ -50,7 +52,7 @@ fun ShowAlertDialog(
                         .size(200.dp),
                 )
                 Text(
-                    text = "Berhasil",
+                    text = stringResource(R.string.success),
                     textAlign = TextAlign.Center,
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
@@ -58,7 +60,7 @@ fun ShowAlertDialog(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Alat rusak dilaporkan!",
+                    text = stringResource(R.string.alat_rusak_dilaporkan),
                     textAlign = TextAlign.Center,
                     color = Color.Black,
                     fontSize = 16.sp
@@ -77,7 +79,7 @@ fun ShowAlertDialog(
                             .height(50.dp)
                     ) {
                         Text(
-                            text = "Tutup",
+                            text = stringResource(R.string.tutup),
                             textAlign = TextAlign.Center,
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -90,7 +92,6 @@ fun ShowAlertDialog(
         },
         containerColor = Color.White,
         modifier = Modifier
-            .height(380.dp)
     )
 }
 

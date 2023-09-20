@@ -19,7 +19,6 @@ import javax.inject.Inject
 class MonthCheckingViewModel @Inject constructor(
     private val repo: MonitoringRepository
 ) : ViewModel() {
-
     private val _userDataStore = MutableStateFlow(User())
     val userDataStore: StateFlow<User> = _userDataStore
 

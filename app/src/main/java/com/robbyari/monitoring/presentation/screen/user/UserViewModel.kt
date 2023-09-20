@@ -23,8 +23,8 @@ class UserViewModel @Inject constructor(
     private val _reportProblem = MutableStateFlow<Response<List<ReportProblem>>>(Response.Loading)
     val reportProblem: StateFlow<Response<List<ReportProblem>>> = _reportProblem
 
-    private val _barcodeResult = MutableStateFlow<Response<String>>(Response.Loading)
-    val barcodeResult: StateFlow<Response<String>> = _barcodeResult
+    private val _barcodeResult = MutableStateFlow("")
+    val barcodeResult: StateFlow<String> = _barcodeResult
 
     init {
         viewModelScope.launch {
@@ -34,13 +34,10 @@ class UserViewModel @Inject constructor(
     }
 
     suspend fun startScan() {
-        try {
-            repo.getBarcodeText().collectLatest {
-                _barcodeResult.emit(it)
-            }
-        } catch (e: Exception) {
-            _barcodeResult.emit(Response.Failure(e))
-        }
+        _barcodeResult.value = repo.getBarcodeText()
+    }
+    fun resetScanValue() {
+        _barcodeResult.value = ""
     }
 
     private suspend fun fetchReportProblem() {
@@ -54,7 +51,7 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getUserDataStore() {
+    suspend fun getUserDataStore() {
         _userDataStore.value = repo.getUserDataStore()
     }
 }

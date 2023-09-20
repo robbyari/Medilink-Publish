@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -13,11 +12,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.robbyari.monitoring.presentation.navigation.Screen
+import com.robbyari.monitoring.presentation.screen.account.AccountScreen
 import com.robbyari.monitoring.presentation.screen.all.AllScreen
 import com.robbyari.monitoring.presentation.screen.calibrationchecking.CalibrationCheckingScreen
 import com.robbyari.monitoring.presentation.screen.daychecking.DayCheckingScreen
@@ -28,13 +27,10 @@ import com.robbyari.monitoring.presentation.screen.repair.RepairScreen
 
 @Composable
 fun MainApp(
-    location: String?,
     modifier: Modifier = Modifier,
     isDistanceGreaterThan100Meters: Boolean,
     navController: NavHostController = rememberNavController(),
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
     val systemUiController = rememberSystemUiController()
 
     SideEffect {
@@ -71,6 +67,9 @@ fun MainApp(
                     },
                     navigateToDetailAlat = { id ->
                         navController.navigate(Screen.DetailAlat.createRoute(id))
+                    },
+                    navigateToAccountScreen = {id ->
+                        navController.navigate(Screen.Account.createRoute(id))
                     }
                 )
             }
@@ -81,7 +80,6 @@ fun MainApp(
                 val id = it.arguments?.getString("id") ?: ""
                 DayCheckingScreen(
                     id = id,
-                    location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
                     navigateBack = { navController.popBackStack() },
                 )
@@ -93,7 +91,6 @@ fun MainApp(
                 val id = it.arguments?.getString("id") ?: ""
                 MonthCheckingScreen(
                     id = id,
-                    location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
                     navigateBack = { navController.popBackStack() },
                 )
@@ -105,7 +102,6 @@ fun MainApp(
                 val id = it.arguments?.getString("id") ?: ""
                 CalibrationCheckingScreen(
                     id = id,
-                    location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
                     navigateBack = { navController.popBackStack() }
                 )
@@ -119,7 +115,6 @@ fun MainApp(
                 val idReportProblem = it.arguments?.getString("idReportProblem") ?: ""
                 RepairScreen(
                     idReportProblem = idReportProblem,
-                    location = location,
                     isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters,
                     navigateBack = { navController.popBackStack() }
                 )
@@ -161,6 +156,16 @@ fun MainApp(
                 DetailAlatScreen(
                     id = arg,
                     navigateBack = {navController.popBackStack()}
+                )
+            }
+            composable(
+                route = Screen.Account.route,
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) {
+                val arg = it.arguments?.getString("id")
+                AccountScreen(
+                    id = arg,
+                    navigateBack = { navController.popBackStack() },
                 )
             }
         }

@@ -1,6 +1,10 @@
 package com.robbyari.monitoring.presentation.screen.detailalat
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +17,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.ImagesearchRoller
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,23 +31,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.presentation.components.ActionBarDetail
+import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.presentation.theme.LightBlue
 import com.robbyari.monitoring.utils.convertFirebaseTimestamp
 import com.robbyari.monitoring.utils.convertFirebaseTimestampToString
+import com.valentinilk.shimmer.shimmer
 
 @Composable
 fun DetailAlatScreen(
@@ -52,6 +68,7 @@ fun DetailAlatScreen(
         systemUiController.setNavigationBarColor(Color.Black)
     }
     val detail by viewModel.detail.collectAsState()
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp * 0.9f
 
     LaunchedEffect(id) {
         viewModel.getDetail(id!!)
@@ -61,22 +78,37 @@ fun DetailAlatScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(LightBlue)
+            .background(LightBlue),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         when (detail) {
-            is Response.Loading -> {}
-            is Response.Success -> {
-                val item = (detail as Response.Success).data
+            is Response.Loading -> {
                 ActionBarDetail(
-                    title = "Detail Alat",
+                    title = stringResource(R.string.detail_alat),
                     navigateBack = navigateBack,
                     modifier = Modifier
                 )
-                Spacer(
+                Box(
                     modifier = Modifier
-                        .height(16.dp)
                         .fillMaxWidth()
-                        .background(Color.White)
+                        .height(screenHeight),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Blue,
+                        trackColor = Color.White,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
+
+            is Response.Success -> {
+                val item = (detail as Response.Success).data
+                ActionBarDetail(
+                    title = stringResource(R.string.detail_alat),
+                    navigateBack = navigateBack,
+                    modifier = Modifier
                 )
                 DetailAlatContent(
                     item = item!!
@@ -92,6 +124,12 @@ fun DetailAlatScreen(
 fun DetailAlatContent(
     item: Alat
 ) {
+    val painter = rememberAsyncImagePainter(item.photoUrl)
+    val state = painter.state
+    val transition by animateFloatAsState(
+        targetValue = if (state is AsyncImagePainter.State.Success) 1f else 0f, label = ""
+    )
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -101,14 +139,45 @@ fun DetailAlatContent(
                 .padding(start = 16.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = item.photoUrl,
-                contentDescription = "Photo alat",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(65.dp)
-                    .clip(RoundedCornerShape(11))
-            )
+            Box(modifier = Modifier) {
+                when (state) {
+                    is AsyncImagePainter.State.Error -> {
+                        Icon(
+                            Icons.Default.BrokenImage,
+                            contentDescription = stringResource(id = R.string.photo_alat),
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(65.dp)
+                                .background(color = Color.Gray, shape = RoundedCornerShape(11))
+                                .padding(8.dp)
+                        )
+                    }
+
+                    is AsyncImagePainter.State.Loading -> {
+                        Icon(
+                            Icons.Default.ImagesearchRoller,
+                            contentDescription = stringResource(id = R.string.photo_alat),
+                            tint = Color.White,
+                            modifier = Modifier
+                                .shimmer()
+                                .size(65.dp)
+                                .background(color = Color.Gray, shape = RoundedCornerShape(11))
+                                .padding(8.dp)
+                        )
+                    }
+
+                    else -> {}
+                }
+                Image(
+                    painter = painter,
+                    contentDescription = stringResource(id = R.string.photo_alat),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(65.dp)
+                        .clip(RoundedCornerShape(11))
+                        .alpha(transition)
+                )
+            }
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
@@ -120,7 +189,7 @@ fun DetailAlatContent(
                 )
                 Text(
                     text = item.namaAlat!!,
-                    fontSize = 20.sp,
+                    fontSize = 16.sp,
                     color = Color.Black,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.Bold,
@@ -157,19 +226,17 @@ fun DetailAlatContent(
                         .padding(end = 8.dp)
                 ) {
                     Text(
-                        text = "Status : ",
+                        text = stringResource(R.string.statustext),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = item.status ?: "=",
+                        text = item.status ?: stringResource(R.string.space),
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
-                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
@@ -179,11 +246,10 @@ fun DetailAlatContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = "Tahun inventaris : ",
+                        text = stringResource(R.string.tahun_inventaris),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -191,7 +257,6 @@ fun DetailAlatContent(
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
-                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
@@ -208,19 +273,17 @@ fun DetailAlatContent(
                         .padding(end = 8.dp)
                 ) {
                     Text(
-                        text = "Pengecekan harian : ",
+                        text = stringResource(R.string.pengecekan_harian_text),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = if (item.cekHarian == true) "Iya" else "Tidak",
+                        text = if (item.cekHarian == true) stringResource(R.string.iya) else stringResource(R.string.tidak),
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
-                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
@@ -230,19 +293,17 @@ fun DetailAlatContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = "Pengecekan bulanan : ",
+                        text = stringResource(R.string.pengecekan_bulanan_text),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = if (item.cekBulanan == true) "Iya" else "Tidak",
+                        text = if (item.cekBulanan == true) stringResource(R.string.iya) else stringResource(R.string.tidak),
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
-                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
@@ -259,19 +320,17 @@ fun DetailAlatContent(
                         .padding(end = 8.dp)
                 ) {
                     Text(
-                        text = "Pengecekan kalibrasi : ",
+                        text = stringResource(R.string.pengecekan_kalibrasi_text),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = if (item.cekKalibrasi == true) "Iya" else "Tidak",
+                        text = if (item.cekKalibrasi == true) stringResource(R.string.iya) else stringResource(R.string.tidak),
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
-                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
@@ -281,11 +340,10 @@ fun DetailAlatContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = "Instansi kalibrasi : ",
+                        text = stringResource(R.string.instansi_kalibrasi),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -309,11 +367,10 @@ fun DetailAlatContent(
                         .padding(end = 8.dp)
                 ) {
                     Text(
-                        text = "Merk : ",
+                        text = stringResource(R.string.merk),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -321,7 +378,6 @@ fun DetailAlatContent(
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
-                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
@@ -331,11 +387,10 @@ fun DetailAlatContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = "Supplier : ",
+                        text = stringResource(R.string.supplier),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -361,11 +416,10 @@ fun DetailAlatContent(
                         .padding(end = 8.dp)
                 ) {
                     Text(
-                        text = "Terakhir dicek oleh : ",
+                        text = stringResource(R.string.terakhir_dicek_oleh),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -382,11 +436,10 @@ fun DetailAlatContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = "Jadwal harian : ",
+                        text = stringResource(R.string.jadwal_harian),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -410,11 +463,10 @@ fun DetailAlatContent(
                         .padding(end = 8.dp)
                 ) {
                     Text(
-                        text = "Jadwal bulanan : ",
+                        text = stringResource(R.string.jadwal_bulanan),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -431,11 +483,10 @@ fun DetailAlatContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = "Jadwal kalibrasi : ",
+                        text = stringResource(R.string.jadwal_kalibrasi),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -455,11 +506,10 @@ fun DetailAlatContent(
                     .padding(start = 16.dp, end = 16.dp)
             ) {
                 Text(
-                    text = "List cek harian : ",
+                    text = stringResource(R.string.list_cek_harian),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Start,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 val keys = item.listCekHarian?.keys?.toList() ?: emptyList()
@@ -481,7 +531,7 @@ fun DetailAlatContent(
                     )
                 } else {
                     Text(
-                        text = "-",
+                        text = stringResource(R.string.space),
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
@@ -497,11 +547,10 @@ fun DetailAlatContent(
                     .padding(start = 16.dp, end = 16.dp)
             ) {
                 Text(
-                    text = "List cek bulanan : ",
+                    text = stringResource(R.string.list_cek_bulanan),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Start,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 val keys = item.listCekBulanan?.keys?.toList() ?: emptyList()
@@ -523,7 +572,7 @@ fun DetailAlatContent(
                     )
                 } else {
                     Text(
-                        text = "-",
+                        text = stringResource(R.string.space),
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
@@ -539,11 +588,10 @@ fun DetailAlatContent(
                     .padding(start = 16.dp, end = 16.dp)
             ) {
                 Text(
-                    text = "List cek kalibrasi : ",
+                    text = stringResource(R.string.list_cek_kalibrasi),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Start,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 val keys = item.listCekKalibrasi?.keys?.toList() ?: emptyList()
@@ -565,7 +613,7 @@ fun DetailAlatContent(
                     )
                 } else {
                     Text(
-                        text = "-",
+                        text = stringResource(R.string.space),
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,

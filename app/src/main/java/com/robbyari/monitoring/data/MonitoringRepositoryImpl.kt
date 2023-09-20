@@ -2,7 +2,6 @@ package com.robbyari.monitoring.data
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -14,6 +13,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.Checking
 import com.robbyari.monitoring.domain.model.ReportProblem
@@ -40,7 +40,7 @@ class MonitoringRepositoryImpl @Inject constructor(
     private val storage: FirebaseStorage,
     private val db: FirebaseFirestore,
     private val userDataStorePreferences: DataStore<Preferences>,
-    context: Context,
+    private val context: Context,
 ) : MonitoringRepository {
 
     private val options = GmsBarcodeScannerOptions.Builder()
@@ -52,10 +52,10 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     override suspend fun loginUser(email: String, password: String): Boolean {
         return try {
-            val querySnapshot = db.collection("User")
-                .whereEqualTo("email", email)
-                .whereEqualTo("password", password)
-                .whereEqualTo("status", true)
+            val querySnapshot = db.collection(context.getString(R.string.user))
+                .whereEqualTo(context.getString(R.string.email), email)
+                .whereEqualTo(context.getString(R.string.password), password)
+                .whereEqualTo(context.getString(R.string.status), true)
                 .get()
                 .await()
 
@@ -71,11 +71,9 @@ class MonitoringRepositoryImpl @Inject constructor(
             val user = checkUser(email)
             userDataStorePreferences.edit { preferences ->
                 preferences[KEY_EMAIL] = email
-                preferences[KEY_FIRSTNAME] = user.firstName ?: ""
-                preferences[KEY_LASTNAME] = user.lastName ?: ""
+                preferences[KEY_NAME] = user.name ?: ""
                 preferences[KEY_PHOTO_URL] = user.photoUrl ?: ""
                 preferences[KEY_ROLE] = user.role ?: ""
-                preferences[KEY_DIVISI] = user.divisi ?: ""
                 preferences[KEY_UID] = user.uid ?: ""
             }
             Response.Success(Unit)
@@ -93,9 +91,9 @@ class MonitoringRepositoryImpl @Inject constructor(
             set(Calendar.MILLISECOND, 0)
         }.time
 
-        val query = db.collection("Alat")
-            .whereEqualTo("cekHarian", true)
-            .whereLessThan("pengecekanHarian", currentDate)
+        val query = db.collection(context.getString(R.string.alat))
+            .whereEqualTo(context.getString(R.string.cekharian), true)
+            .whereLessThan(context.getString(R.string.pengecekanharian), currentDate)
 
         val listener = query.addSnapshotListener { querySnapshot, exception ->
             if (exception != null) {
@@ -126,9 +124,9 @@ class MonitoringRepositoryImpl @Inject constructor(
             set(Calendar.MILLISECOND, 0)
         }.time
 
-        val query = db.collection("Alat")
-            .whereEqualTo("cekBulanan", true)
-            .whereLessThan("pengecekanBulanan", currentDate)
+        val query = db.collection(context.getString(R.string.alat))
+            .whereEqualTo(context.getString(R.string.cekbulanan), true)
+            .whereLessThan(context.getString(R.string.pengecekanbulanan), currentDate)
 
         val listener = query.addSnapshotListener { querySnapshot, exception ->
             if (exception != null) {
@@ -159,9 +157,9 @@ class MonitoringRepositoryImpl @Inject constructor(
             set(Calendar.MILLISECOND, 0)
         }.time
 
-        val query = db.collection("Alat")
-            .whereEqualTo("cekKalibrasi", true)
-            .whereLessThan("kalibrasi", currentDate)
+        val query = db.collection(context.getString(R.string.alat))
+            .whereEqualTo(context.getString(R.string.cekkalibrasi), true)
+            .whereLessThan(context.getString(R.string.kalibrasi), currentDate)
 
         val listener = query.addSnapshotListener { querySnapshot, exception ->
             if (exception != null) {
@@ -183,27 +181,21 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getBarcodeText(): Flow<Response<String>> = flow {
-        emit(Response.Loading)
-        try {
-            val barcodeValue = scanner.startScan().await()
-            emit(Response.Success(barcodeValue.rawValue))
-        } catch (e: Exception) {
-            emit(Response.Failure(e))
-        }
+    override suspend fun getBarcodeText(): String {
+        val barcodeValue = scanner.startScan().await()
+        return barcodeValue.rawValue ?: ""
     }
 
     override suspend fun getDetailAlat(id: String): Flow<Response<Alat>> = flow {
         emit(Response.Loading)
         try {
-            val getDetail = db.collection("Alat").document(id).get().await()
+            val getDetail = db.collection(context.getString(R.string.alat)).document(id).get().await()
             val detail = getDetail.toObject(Alat::class.java)
 
             if (detail != null) {
                 emit(Response.Success(detail))
             } else {
-                Log.d("Gagal", "Data kosong")
-                emit(Response.Failure(Exception("Data tidak ada")))
+                emit(Response.Failure(Exception(context.getString(R.string.data_not_found))))
             }
 
         } catch (e: Exception) {
@@ -217,21 +209,36 @@ class MonitoringRepositoryImpl @Inject constructor(
             val timestamp = System.currentTimeMillis()
             val uniqueFilename = "image_$timestamp.jpg"
 
-            val storageReference = storage.reference.child("Images").child("Bukti Pengecekan").child(uniqueFilename)
+            val storageReference = storage.reference.child(context.getString(R.string.images)).child(context.getString(R.string.bukti_pengecekan)).child(uniqueFilename)
             storageReference.putFile(imageUri).await()
 
             val downloadUrl = storageReference.downloadUrl.await()
             downloadUrl.toString()
         } catch (e: Exception) {
             e.printStackTrace()
-            "Gagal Upload Gambar"
+            context.getString(R.string.failed)
+        }
+    }
+
+    override suspend fun addPhotoProfileToFirebaseStorage(imageUri: Uri, idUser: String): String {
+        return try {
+            val uniqueFilename = "image_$idUser.jpg"
+
+            val storageReference = storage.reference.child(context.getString(R.string.images)).child(context.getString(R.string.photo_profile)).child(uniqueFilename)
+            storageReference.putFile(imageUri).await()
+
+            val downloadUrl = storageReference.downloadUrl.await()
+            downloadUrl.toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            context.getString(R.string.failed)
         }
     }
 
     override suspend fun addToDayChecking(idDocument: String, item: Checking): Flow<Response<Boolean>> = flow {
         emit(Response.Loading)
         try {
-            val documentRef = db.collection("DayChecking")
+            val documentRef = db.collection(context.getString(R.string.daychecking))
                 .document(idDocument)
 
             documentRef.set(item).await()
@@ -245,7 +252,7 @@ class MonitoringRepositoryImpl @Inject constructor(
     override suspend fun addToMonthChecking(idDocument: String, item: Checking): Flow<Response<Boolean>> = flow {
         emit(Response.Loading)
         try {
-            val documentRef = db.collection("MonthChecking")
+            val documentRef = db.collection(context.getString(R.string.monthchecking))
                 .document(idDocument)
 
             documentRef.set(item).await()
@@ -259,7 +266,7 @@ class MonitoringRepositoryImpl @Inject constructor(
     override suspend fun addToCalibrationChecking(idDocument: String, item: Checking): Flow<Response<Boolean>> = flow {
         emit(Response.Loading)
         try {
-            val documentRef = db.collection("CalibrationChecking")
+            val documentRef = db.collection(context.getString(R.string.calibrationchecking))
                 .document(idDocument)
 
             documentRef.set(item).await()
@@ -281,21 +288,17 @@ class MonitoringRepositoryImpl @Inject constructor(
                     }
                 }
                 .map { preferences ->
-                    val firstname = preferences[KEY_FIRSTNAME]
-                    val lastname = preferences[KEY_LASTNAME]
+                    val name = preferences[KEY_NAME]
                     val email = preferences[KEY_EMAIL]
                     val photo = preferences[KEY_PHOTO_URL]
                     val role = preferences[KEY_ROLE]
-                    val divisi = preferences[KEY_DIVISI]
                     val uid = preferences[KEY_UID]
 
                     User(
-                        firstName = firstname,
-                        lastName = lastname,
+                        name = name,
                         email = email,
                         photoUrl = photo,
                         role = role,
-                        divisi = divisi,
                         uid = uid
                     )
                 }
@@ -310,7 +313,7 @@ class MonitoringRepositoryImpl @Inject constructor(
     override suspend fun addToReportProblem(idDocument: String, item: ReportProblem): Flow<Response<Boolean>> = flow {
         emit(Response.Loading)
         try {
-            val documentRef = db.collection("ReportProblem")
+            val documentRef = db.collection(context.getString(R.string.reportproblem))
                 .document(idDocument)
 
             documentRef.set(item).await()
@@ -321,7 +324,7 @@ class MonitoringRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getReportProblem(): Flow<Response<List<ReportProblem>>> = callbackFlow {
-        val query = db.collection("ReportProblem")
+        val query = db.collection(context.getString(R.string.reportproblem))
 
         val listener = query.addSnapshotListener { querySnapshot, exception ->
             if (exception != null) {
@@ -346,14 +349,14 @@ class MonitoringRepositoryImpl @Inject constructor(
     override suspend fun getDetailReportProblem(id: String): Flow<Response<ReportProblem>> = flow {
         emit(Response.Loading)
         try {
-            val data = db.collection("ReportProblem")
+            val data = db.collection(context.getString(R.string.reportproblem))
                 .document(id).get().await()
             val detail = data.toObject(ReportProblem::class.java)
 
             if (detail != null) {
                 emit(Response.Success(detail))
             } else {
-                emit(Response.Failure(Exception("Data tidak ditemukan")))
+                emit(Response.Failure(Exception(context.getString(R.string.data_not_found))))
             }
 
         } catch (e: Exception) {
@@ -365,21 +368,18 @@ class MonitoringRepositoryImpl @Inject constructor(
     override suspend fun updateToReportProblem(item: ReportProblem): Flow<Response<Boolean>> = flow {
         emit(Response.Loading)
         try {
-            val doc = FirebaseFirestore.getInstance().collection("ReportProblem")
+            val doc = FirebaseFirestore.getInstance().collection(context.getString(R.string.reportproblem))
             val id = item.idReport!!
 
             val document = doc.document(id).get().await()
 
-            if (!document.exists()) {
-                Log.d("Kosong", "Tidak ada dokumen dengan idAlat: ${item.idReport}")
-            } else {
-                doc.document(id).update("status", item.status)
-                doc.document(id).update("repairedBy", item.repairedBy)
-                doc.document(id).update("repairedAt", item.repairedAt)
-                doc.document(id).update("photoTeknisi", item.photoTeknisi)
-                doc.document(id).update("photoRepair", item.photoRepair)
-                doc.document(id).update("notesRepair", item.notesRepair)
-                Log.d("Berhasil Update", "")
+            if (document.exists()) {
+                doc.document(id).update(context.getString(R.string.status), item.status)
+                doc.document(id).update(context.getString(R.string.repairedby), item.repairedBy)
+                doc.document(id).update(context.getString(R.string.repairedat), item.repairedAt)
+                doc.document(id).update(context.getString(R.string.phototeknisi), item.photoTeknisi)
+                doc.document(id).update(context.getString(R.string.photorepair), item.photoRepair)
+                doc.document(id).update(context.getString(R.string.notesrepair), item.notesRepair)
                 emit(Response.Success(true))
             }
         } catch (e: Exception) {
@@ -389,7 +389,7 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     override suspend fun countItemAlat(): Int {
         return try {
-            val collectionRef = db.collection("Alat")
+            val collectionRef = db.collection(context.getString(R.string.alat))
             val snapshot = collectionRef.get().await()
 
             snapshot.size()
@@ -400,7 +400,7 @@ class MonitoringRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getListAlat(): Flow<Response<List<Alat>>> = callbackFlow {
-        val query = db.collection("Alat")
+        val query = db.collection(context.getString(R.string.alat))
 
         val listener = query.addSnapshotListener { querySnapshot, exception ->
             if (exception != null) {
@@ -424,17 +424,16 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     override suspend fun changeEmail(uid: String, emailUpdate: String): Boolean {
         return try {
-            val doc = db.collection("User")
+            val doc = db.collection(context.getString(R.string.user))
             val documentSnapshot = doc.document(uid).get().await()
 
             if (documentSnapshot.exists()) {
-                doc.document(uid).update("email", emailUpdate)
+                doc.document(uid).update(context.getString(R.string.email), emailUpdate)
                 userDataStorePreferences.edit { preferences ->
                     preferences[KEY_EMAIL] = emailUpdate
                 }
                 documentSnapshot.exists()
             } else {
-                Log.d("Kosong", "")
                 false
             }
 
@@ -445,7 +444,7 @@ class MonitoringRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUserDatabase(uid: String): Flow<Response<User>> = callbackFlow {
-        val query = db.collection("User").document(uid)
+        val query = db.collection(context.getString(R.string.user)).document(uid)
 
         val listener = query.addSnapshotListener { querySnapshot, exception ->
             if (exception != null) {
@@ -453,13 +452,11 @@ class MonitoringRepositoryImpl @Inject constructor(
                 return@addSnapshotListener
             }
 
-            if (querySnapshot != null) {
-                val document = querySnapshot.toObject(User::class.java)
-                if (document != null) {
-                    trySend(Response.Success(document))
-                } else {
-                    trySend(Response.Failure(Exception("Document conversion failed")))
-                }
+            val document = querySnapshot?.toObject(User::class.java)
+            if (document != null) {
+                trySend(Response.Success(document))
+            } else {
+                trySend(Response.Failure(Exception(context.getString(R.string.data_not_found))))
             }
         }
 
@@ -471,33 +468,50 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     override suspend fun changePassword(uid: String, passwordUpdate: String): Boolean {
         return try {
-            val doc = db.collection("User")
+            val doc = db.collection(context.getString(R.string.user))
             val documentSnapshot = doc.document(uid).get().await()
 
             if (documentSnapshot.exists()) {
-                doc.document(uid).update("password", passwordUpdate)
+                doc.document(uid).update(context.getString(R.string.password), passwordUpdate)
 
                 documentSnapshot.exists()
             } else {
-                Log.d("Kosong", "")
                 false
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
             false
         }
     }
 
-    override suspend fun resetDataStore() : Boolean {
+    override suspend fun changePhotoProfile(uid: String, urlUpdate: String): Boolean {
+        return try {
+            val doc = db.collection(context.getString(R.string.user))
+            val documentSnapshot = doc.document(uid).get().await()
+
+            if (documentSnapshot.exists()) {
+                doc.document(uid).update(context.getString(R.string.photourl), urlUpdate)
+                userDataStorePreferences.edit { preferences ->
+                    preferences[KEY_PHOTO_URL] = urlUpdate
+                }
+
+                documentSnapshot.exists()
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    override suspend fun resetDataStore(): Boolean {
         return try {
             userDataStorePreferences.edit { preferences ->
                 preferences[KEY_EMAIL] = ""
-                preferences[KEY_FIRSTNAME] = ""
-                preferences[KEY_LASTNAME] = ""
+                preferences[KEY_NAME] = ""
                 preferences[KEY_PHOTO_URL] = ""
                 preferences[KEY_ROLE] = ""
-                preferences[KEY_DIVISI] = ""
                 preferences[KEY_UID] = ""
             }
             true
@@ -507,19 +521,43 @@ class MonitoringRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun registerUser(user: User): Boolean {
+        return try {
+            val documentRef = db.collection(context.getString(R.string.user))
+                .document(user.uid!!)
+
+            documentRef.set(user).await()
+
+            val result = documentRef.get().await()
+            return result.exists()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    override suspend fun deleteAccount(id: String) {
+        try {
+            resetDataStore()
+            db.collection("User").document(id).delete().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private suspend fun checkUser(email: String): User {
         return try {
-            val querySnapshot = db.collection("User")
-                .whereEqualTo("email", email)
+            val querySnapshot = db.collection(context.getString(R.string.user))
+                .whereEqualTo(context.getString(R.string.email), email)
                 .get()
                 .await()
 
             if (!querySnapshot.isEmpty) {
                 val userDocument = querySnapshot.documents.first()
                 val user = userDocument.toObject(User::class.java)
-                user ?: throw Exception("User not found")
+                user ?: throw Exception(context.getString(R.string.user_not_found))
             } else {
-                throw Exception("User not found")
+                throw Exception(context.getString(R.string.user_not_found))
             }
         } catch (e: Exception) {
             throw e
@@ -528,17 +566,13 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     private suspend fun updateDailyChecking(id: String, petugasHariIni: String, timestamp: Timestamp) {
         try {
-            val doc = FirebaseFirestore.getInstance().collection("Alat")
+            val doc = FirebaseFirestore.getInstance().collection(context.getString(R.string.alat))
             val documentSnapshot = doc.document(id).get().await()
 
             if (documentSnapshot.exists()) {
-                doc.document(id).update("pengecekanHarian", timestamp)
-                doc.document(id).update("terakhirDicekOleh", petugasHariIni)
-                Log.d("Berhasil Update", "")
-            } else {
-                Log.d("Kosong", "")
+                doc.document(id).update(context.getString(R.string.pengecekanharian), timestamp)
+                doc.document(id).update(context.getString(R.string.terakhirdicekoleh), petugasHariIni)
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -546,17 +580,13 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     private suspend fun updateMonthlyChecking(id: String, petugasHariIni: String, timestamp: Timestamp) {
         try {
-            val doc = FirebaseFirestore.getInstance().collection("Alat")
+            val doc = FirebaseFirestore.getInstance().collection(context.getString(R.string.alat))
             val documentSnapshot = doc.document(id).get().await()
 
             if (documentSnapshot.exists()) {
-                doc.document(id).update("pengecekanBulanan", timestamp)
-                doc.document(id).update("terakhirDicekOleh", petugasHariIni)
-                Log.d("Berhasil Update", "")
-            } else {
-                Log.d("Kosong", "")
+                doc.document(id).update(context.getString(R.string.pengecekanbulanan), timestamp)
+                doc.document(id).update(context.getString(R.string.terakhirdicekoleh), petugasHariIni)
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -564,18 +594,13 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     private suspend fun updateCalibrationChecking(id: String, petugasHariIni: String, timestamp: Timestamp) {
         try {
-            val doc = FirebaseFirestore.getInstance().collection("Alat")
+            val doc = FirebaseFirestore.getInstance().collection(context.getString(R.string.alat))
             val documentSnapshot = doc.document(id).get().await()
 
-
             if (documentSnapshot.exists()) {
-                doc.document(id).update("kalibrasi", timestamp)
-                doc.document(id).update("terakhirDicekOleh", petugasHariIni)
-                Log.d("Berhasil Update", "")
-            } else {
-                Log.d("Kosong", "")
+                doc.document(id).update(context.getString(R.string.kalibrasi), timestamp)
+                doc.document(id).update(context.getString(R.string.terakhirdicekoleh), petugasHariIni)
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -583,14 +608,9 @@ class MonitoringRepositoryImpl @Inject constructor(
 
     companion object {
         val KEY_UID = stringPreferencesKey("uid")
-        val KEY_FIRSTNAME = stringPreferencesKey("firstname")
-        val KEY_LASTNAME = stringPreferencesKey("lastname")
+        val KEY_NAME = stringPreferencesKey("name")
         val KEY_EMAIL = stringPreferencesKey("email")
-        val KEY_PASSWORD = stringPreferencesKey("password")
         val KEY_PHOTO_URL = stringPreferencesKey("photourl")
         val KEY_ROLE = stringPreferencesKey("role")
-        val KEY_DIVISI = stringPreferencesKey("divisi")
-        val KEY_STATUS = stringPreferencesKey("status")
     }
-
 }

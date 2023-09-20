@@ -13,7 +13,7 @@ data class ReportProblem(
     val nameUser: String? = "",
     val photoUser: String? = "",
     val createdAt: Timestamp? = Timestamp(0, 0),
-    val divisi: String? = "",
+    val role: String? = "",
     val notesUser: String? = "",
     val notesRepair: String? = "",
     val photoTeknisi: String? = "",

@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,6 +54,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.Timestamp
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.ReportProblem
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.presentation.components.ActionBarDetail
@@ -89,7 +91,7 @@ fun ReportScreen(
     val userDataStore by viewModel.userDataStore.collectAsState()
     val (notes, onQueryChange) = remember { mutableStateOf("") }
     val timestampString = remember { mutableStateOf(generateTimestamp()) }
-    val isLoading =  remember { mutableStateOf(false) }
+    val isLoading = remember { mutableStateOf(false) }
     val addToReportProblem by viewModel.addToReportProblem.collectAsState()
     val showSuccessDialog = remember { mutableStateOf(false) }
 
@@ -103,6 +105,7 @@ fun ReportScreen(
                 isLoading.value = false
                 showSuccessDialog.value = true
             }
+
             else -> {}
         }
     }
@@ -126,7 +129,7 @@ fun ReportScreen(
                 .background(LightBlue)
         ) {
             ActionBarDetail(
-                title = "Laporan Masalah",
+                title = stringResource(R.string.laporan_masalah),
                 navigateBack = { navigateBack() },
                 modifier = Modifier
             )
@@ -153,6 +156,7 @@ fun ReportScreen(
                         )
                     }
                 }
+
                 is Response.Success -> {
                     val item = (detailAlat as Response.Success).data
                     Row(
@@ -172,7 +176,7 @@ fun ReportScreen(
                                 is AsyncImagePainter.State.Error -> {
                                     Icon(
                                         Icons.Default.BrokenImage,
-                                        contentDescription = "Photo alat",
+                                        contentDescription = stringResource(id = R.string.photo_alat),
                                         tint = Color.White,
                                         modifier = Modifier
                                             .size(65.dp)
@@ -184,7 +188,7 @@ fun ReportScreen(
                                 is AsyncImagePainter.State.Loading -> {
                                     Icon(
                                         Icons.Default.ImagesearchRoller,
-                                        contentDescription = "Photo alat",
+                                        contentDescription = stringResource(id = R.string.photo_alat),
                                         tint = Color.White,
                                         modifier = Modifier
                                             .shimmer()
@@ -193,11 +197,12 @@ fun ReportScreen(
                                             .padding(8.dp)
                                     )
                                 }
+
                                 else -> {}
                             }
                             Image(
                                 painter = painter,
-                                contentDescription = "Photo alat",
+                                contentDescription = stringResource(id = R.string.photo_alat),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(65.dp)
@@ -217,7 +222,7 @@ fun ReportScreen(
                             )
                             Text(
                                 text = item.namaAlat!!,
-                                fontSize = 20.sp,
+                                fontSize = 16.sp,
                                 color = Color.Black,
                                 overflow = TextOverflow.Ellipsis,
                                 fontWeight = FontWeight.Bold,
@@ -247,7 +252,7 @@ fun ReportScreen(
                     ) {
                         Column(modifier = Modifier.weight(0.5f)) {
                             Text(
-                                text = "Pelapor : ",
+                                text = stringResource(id = R.string.pelapor),
                                 fontSize = 16.sp,
                                 color = Color.Gray,
                                 textAlign = TextAlign.Start,
@@ -255,7 +260,7 @@ fun ReportScreen(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = "${userDataStore.firstName} ${userDataStore.lastName}",
+                                text = "${userDataStore.name}",
                                 fontSize = 16.sp,
                                 color = Color.Black,
                                 textAlign = TextAlign.Start,
@@ -266,11 +271,10 @@ fun ReportScreen(
                         }
                         Column(modifier = Modifier.weight(0.5f)) {
                             Text(
-                                text = "Waktu pelaporan : ",
+                                text = stringResource(id = R.string.waktu_pelaporan),
                                 fontSize = 16.sp,
                                 color = Color.Gray,
                                 textAlign = TextAlign.Start,
-                                maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
@@ -278,7 +282,6 @@ fun ReportScreen(
                                 fontSize = 16.sp,
                                 color = Color.Black,
                                 textAlign = TextAlign.Start,
-                                maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.padding(end = 16.dp)
                             )
@@ -287,7 +290,7 @@ fun ReportScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                         Text(
-                            text = "Divisi : ",
+                            text = stringResource(id = R.string.divisi),
                             fontSize = 16.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Start,
@@ -295,7 +298,7 @@ fun ReportScreen(
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
-                            text = userDataStore.divisi ?: "",
+                            text = userDataStore.role ?: "",
                             fontSize = 16.sp,
                             color = Color.Black,
                             textAlign = TextAlign.Start,
@@ -306,6 +309,7 @@ fun ReportScreen(
                     }
                     Spacer(modifier = Modifier.height(20.dp))
                     TextFieldNote(notes = notes, onQueryChange = onQueryChange, modifier = Modifier.padding(start = 16.dp, end = 16.dp))
+                    Spacer(modifier = Modifier.height(100.dp))
                 }
 
                 is Response.Failure -> {
@@ -317,7 +321,7 @@ fun ReportScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Data tidak ditemukan",
+                            text = stringResource(id = R.string.data_tidak_ditemukan),
                             color = Color.Black,
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,
@@ -342,10 +346,10 @@ fun ReportScreen(
                             noSeri = data?.noSeri,
                             unit = data?.unit,
                             idUser = userDataStore.uid,
-                            nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
+                            nameUser = "${userDataStore.name}",
                             photoUser = userDataStore.photoUrl,
                             createdAt = convertStringToFirebaseTimestamp(timestampString.value),
-                            divisi = userDataStore.divisi,
+                            role = userDataStore.role,
                             notesUser = notes,
                             notesRepair = "",
                             photoTeknisi = "",
@@ -359,11 +363,13 @@ fun ReportScreen(
                                 viewModel.addToReportProblem(idDocument = timeStamp, item = reportProblem)
                             }
                         } else {
-                            Toast.makeText(context, "Catatan tidak boleh kosong!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.catatan_tidak_boleh_kosong), Toast.LENGTH_SHORT).show()
+                            isLoading.value = false
                         }
                     }
+
                     else -> {
-                        Toast.makeText(context, "Data tidak ditemukan", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.data_tidak_ditemukan), Toast.LENGTH_SHORT).show()
                         isLoading.value = false
                     }
                 }
@@ -381,7 +387,7 @@ fun ReportScreen(
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(30.dp))
             } else {
                 Text(
-                    text = "Kirim",
+                    text = stringResource(id = R.string.kirim),
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,

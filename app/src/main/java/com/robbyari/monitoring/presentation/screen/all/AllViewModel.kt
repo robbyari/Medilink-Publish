@@ -15,7 +15,6 @@ import javax.inject.Inject
 class AllViewModel @Inject constructor(
     private val repo: MonitoringRepository
 ) : ViewModel() {
-
     private val _reportProblemCheck = MutableStateFlow<Response<List<ReportProblem>>>(Response.Loading)
     val reportProblemCheck: StateFlow<Response<List<ReportProblem>>> = _reportProblemCheck
 

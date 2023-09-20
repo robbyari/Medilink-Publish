@@ -19,9 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.robbyari.monitoring.R
 
 @Composable
 fun ActionBarDetail(
@@ -45,7 +47,7 @@ fun ActionBarDetail(
         ) {
             Icon(
                 imageVector = Icons.Outlined.ArrowBackIos,
-                contentDescription = "Icon Back",
+                contentDescription = stringResource(R.string.icon_back),
                 tint = Color.Gray,
                 modifier = Modifier
             )
@@ -54,7 +56,7 @@ fun ActionBarDetail(
             text = title,
             color = Color.Black,
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 16.sp,
             modifier = Modifier
 
         )

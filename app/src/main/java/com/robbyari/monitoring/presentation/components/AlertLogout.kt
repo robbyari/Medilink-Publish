@@ -20,10 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.presentation.theme.LightBlue
 
@@ -37,7 +39,7 @@ fun AlertLogout(
             onDismissRequest = onDismissRequest,
             title = {
                 Text(
-                    text = "Logout",
+                    text = stringResource(R.string.logout),
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                     fontSize = 20.sp,
@@ -51,11 +53,10 @@ fun AlertLogout(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Apakah kamu ingin keluar?",
+                        text = stringResource(R.string.apakah_kamu_ingin_keluar),
                         textAlign = TextAlign.Center,
                         color = Color.Black,
                         fontSize = 16.sp,
-                        maxLines = 1
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     Row(
@@ -71,7 +72,7 @@ fun AlertLogout(
                                 .height(52.dp)
                         ) {
                             Text(
-                                text = "Batal",
+                                text = stringResource(R.string.batal),
                                 color = Color.White,
                                 fontSize = 16.sp,
                                 maxLines = 1
@@ -87,7 +88,7 @@ fun AlertLogout(
                                 .height(52.dp)
                         ) {
                             Text(
-                                text = "Keluar",
+                                text = stringResource(R.string.keluar),
                                 color = Color.White,
                                 fontSize = 16.sp,
                                 maxLines = 1
@@ -99,14 +100,13 @@ fun AlertLogout(
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.Logout,
-                    contentDescription = "Icon keluar",
+                    contentDescription = stringResource(R.string.icon_keluar),
                     tint = Color.Black,
                     modifier = Modifier.size(50.dp)
                 )
             },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .height(250.dp)
         )
     }
 }

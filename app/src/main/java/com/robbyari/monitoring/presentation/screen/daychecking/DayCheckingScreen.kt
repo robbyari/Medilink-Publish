@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.Timestamp
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.Checking
 import com.robbyari.monitoring.domain.model.ReportProblem
@@ -76,7 +78,6 @@ import java.util.Objects
 @Composable
 fun DayCheckingScreen(
     id: String?,
-    location: String?,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
     viewModel: DayCheckingViewModel = hiltViewModel()
@@ -132,10 +133,10 @@ fun DayCheckingScreen(
         ActivityResultContracts.RequestPermission()
     ) {
         if (it) {
-            Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.permission_granted), Toast.LENGTH_SHORT).show()
             cameraLauncher.launch(uri)
         } else {
-            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.permission_denied), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -145,7 +146,6 @@ fun DayCheckingScreen(
                 navigateBack()
                 isLoading = false
             }
-
             else -> {}
         }
     }
@@ -178,10 +178,10 @@ fun DayCheckingScreen(
             noSeri = data.noSeri,
             unit = data.unit,
             idUser = userDataStore.uid,
-            nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
+            nameUser = "${userDataStore.name}",
             photoUser = userDataStore.photoUrl,
             createdAt = convertStringToFirebaseTimestamp(timestampString),
-            divisi = userDataStore.divisi,
+            role = userDataStore.role,
             notesUser = notesReport,
             notesRepair = "",
             photoTeknisi = "",
@@ -207,7 +207,7 @@ fun DayCheckingScreen(
                         viewModel.addToReportProblem(timeStamp, reportProblem)
                     }
                 } else {
-                    Toast.makeText(context, "Catatan tidak boleh kosong!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.catatan_tidak_boleh_kosong), Toast.LENGTH_SHORT).show()
                 }
             }
         )
@@ -220,13 +220,12 @@ fun DayCheckingScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(LightBlue),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(LightBlue),
     ) {
         when (detailState) {
-            is Response.Loading -> {
-                Log.d("Loading", "")
-            }
-
+            is Response.Loading -> {}
             is Response.Success -> {
                 val data = (detailState as Response.Success<Alat>).data
                 totalItemCount.value = data?.listCekHarian?.size ?: 0
@@ -238,18 +237,18 @@ fun DayCheckingScreen(
                             .systemBarsPadding()
                     ) {
                         ActionBarDetail(
-                            title = "Pengecekan Harian",
+                            title = stringResource(id = R.string.pengecekan_harian),
                             navigateBack = navigateBack,
                             modifier = Modifier
                         )
                         DetailHeaderContent(data = data, dayChecking = true)
                         BodyContentChecking(
                             time = timestampString,
-                            location = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
+                            location = if (isDistanceGreaterThan100Meters) stringResource(id = R.string.diluar_jangkauan) else stringResource(id = R.string.rs_prikasih),
                             capturedImageUri = capturedImageUri.path?.isNotEmpty() == true,
                             painter = rememberAsyncImagePainter(capturedImageUri),
                             listCek = data.listCekHarian,
-                            nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
+                            nameUser = "${userDataStore.name}",
                             checkedItems = checkedItems,
                             checkedItemCount = checkedItemCount,
                             progressPercentage = progressPercentage,
@@ -260,6 +259,7 @@ fun DayCheckingScreen(
                                 val permissionCheckResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
                                 if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
                                     cameraLauncher.launch(uri)
+                                    Log.d("cek klik camera", "berhasil")
                                 } else {
                                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                                 }
@@ -269,10 +269,7 @@ fun DayCheckingScreen(
                     }
                 }
             }
-
-            is Response.Failure -> {
-                Log.d("Failure", "")
-            }
+            is Response.Failure -> {}
         }
 
         Row(
@@ -297,7 +294,7 @@ fun DayCheckingScreen(
             {
                 Icon(
                     imageVector = Icons.Default.ReportProblem,
-                    contentDescription = "Icon Kirim",
+                    contentDescription = stringResource(id = R.string.reportproblem),
                     tint = Color.White,
                     modifier = Modifier
                 )
@@ -322,9 +319,9 @@ fun DayCheckingScreen(
                                 noSeri = data?.noSeri,
                                 namaAlat = data?.namaAlat,
                                 unit = data?.unit,
-                                petugasHariIni = "${userDataStore.firstName} ${userDataStore.lastName}",
+                                petugasHariIni = "${userDataStore.name}",
                                 waktuPegecekan = convertStringToFirebaseTimestamp(timestampString),
-                                lokasi = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
+                                lokasi = if (isDistanceGreaterThan100Meters) context.getString(R.string.diluar_jangkauan) else context.getString(R.string.rs_prikasih),
                                 listCek = updatedListCek,
                                 photoUrl = photoUrl,
                                 progress = "$checkedItemCount/${totalItemCount.value} Selesai",
@@ -334,7 +331,7 @@ fun DayCheckingScreen(
                         }
                     } else {
                         isLoading = false
-                        Toast.makeText(context, "Gambar tidak boleh kosong!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.gambar_tidak_boleh_kosong), Toast.LENGTH_SHORT).show()
                     }
                 },
                 enabled = !isLoading,
@@ -349,7 +346,7 @@ fun DayCheckingScreen(
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(30.dp))
                 } else {
                     Text(
-                        text = "Kirim",
+                        text = stringResource(id = R.string.kirim),
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,

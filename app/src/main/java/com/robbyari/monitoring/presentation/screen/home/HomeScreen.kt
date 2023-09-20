@@ -1,9 +1,7 @@
 package com.robbyari.monitoring.presentation.screen.home
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +19,6 @@ import androidx.compose.material.icons.filled.HomeRepairService
 import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material.icons.filled.WorkHistory
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -34,14 +31,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.ReportProblem
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.domain.model.User
+import com.robbyari.monitoring.presentation.components.BoxEmptyData
+import com.robbyari.monitoring.presentation.components.BoxLoadingData
 import com.robbyari.monitoring.presentation.components.CardContent
 import com.robbyari.monitoring.presentation.components.HomeActionBar
 import com.robbyari.monitoring.presentation.components.ItemContent
@@ -58,16 +58,16 @@ fun HomeScreen(
     navigateToCalibrationChecking: (String) -> Unit,
     navigateToRepairScreen: (String) -> Unit,
     navigateToDetailAlat: (String) -> Unit,
-    navigateToAllScreen: (String) -> Unit
+    navigateToAllScreen: (String) -> Unit,
+    navigateToAccountScreen: (String) -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
     SideEffect {
-        systemUiController.setSystemBarsColor(Color.Transparent, darkIcons = true)
+        systemUiController.setSystemBarsColor(Color.White, darkIcons = true)
         systemUiController.setNavigationBarColor(Color.Black)
     }
 
     val userDataStore by viewModel.userDataStore.collectAsState()
-
 
     Column(
         modifier = Modifier
@@ -77,12 +77,13 @@ fun HomeScreen(
     ) {
         HomeContent(
             user = userDataStore,
-            navigateToDayChecking = {navigateToDayChecking(it)},
-            navigateToMonthChecking = {navigateToMonthChecking(it)},
-            navigateToCalibrationChecking = {navigateToCalibrationChecking(it)},
-            navigateToRepairScreen = {navigateToRepairScreen(it)},
-            navigateToAllScreen = {navigateToAllScreen(it)},
-            navigateToDetailAlat = {navigateToDetailAlat(it)}
+            navigateToDayChecking = { navigateToDayChecking(it) },
+            navigateToMonthChecking = { navigateToMonthChecking(it) },
+            navigateToCalibrationChecking = { navigateToCalibrationChecking(it) },
+            navigateToRepairScreen = { navigateToRepairScreen(it) },
+            navigateToAllScreen = { navigateToAllScreen(it) },
+            navigateToDetailAlat = { navigateToDetailAlat(it) },
+            navigateToAccountScreen = { navigateToAccountScreen(it) }
         )
     }
 }
@@ -96,6 +97,7 @@ fun HomeContent(
     navigateToRepairScreen: (String) -> Unit,
     navigateToAllScreen: (String) -> Unit,
     navigateToDetailAlat: (String) -> Unit,
+    navigateToAccountScreen: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
 
@@ -126,9 +128,11 @@ fun HomeContent(
     }
 
     Column {
-        Spacer(modifier = Modifier.height(6.dp))
-        HomeActionBar(nameDataStore = "${user.firstName} ${user.lastName}", user = user)
-        Spacer(modifier = Modifier.height(16.dp))
+        HomeActionBar(
+            nameDataStore = "${user.name}",
+            user = user,
+            navigateToAccountScreen = { navigateToAccountScreen(user.uid!!) }
+        )
         Divider(thickness = 3.dp, color = Color.LightGray)
         Column(
             modifier = Modifier
@@ -147,54 +151,67 @@ fun HomeContent(
                 item {
                     CardContent(
                         icon = Icons.Filled.HomeRepairService,
-                        title = "Total Alat",
+                        title = stringResource(R.string.total_alat_text),
                         total = countItemAlat,
-                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("alat") }
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(7))
+                            .clickable { navigateToAllScreen("alat") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
                     CardContent(
                         icon = Icons.Filled.ReportProblem,
-                        title = "Laporan Rusak",
+                        title = stringResource(id = R.string.laporan_rusak),
                         total = reportCheckCount.value,
-                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("report") }
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(7))
+                            .clickable { navigateToAllScreen("report") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
                     CardContent(
                         icon = Icons.Filled.WorkHistory,
-                        title = "Pengecekan Harian",
+                        title = stringResource(id = R.string.pengecekan_harian),
                         total = dailyCheckCount.value,
-                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("daychecking") }
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(7))
+                            .clickable { navigateToAllScreen("daychecking") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
                     CardContent(
                         icon = Icons.Filled.WorkHistory,
-                        title = "Pemeliharaan Bulanan",
+                        title = stringResource(id = R.string.pengecekan_bulanan),
                         total = monthlyCheckCount.value,
-                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("monthchecking") }
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(7))
+                            .clickable { navigateToAllScreen("monthchecking") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 item {
                     CardContent(
                         icon = Icons.Filled.WorkHistory,
-                        title = "Kalibrasi Alat",
+                        title = stringResource(id = R.string.kalibrasi_alat),
                         total = calibrationCheckCount.value,
-                        modifier = Modifier.clip(RoundedCornerShape(7)).clickable { navigateToAllScreen("calibrationchecking") }
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(7))
+                            .clickable { navigateToAllScreen("calibrationchecking") }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            TitleBar(title = "Laporan Rusak", detail = "Semua", navigateToAllScreen = { navigateToAllScreen("report") })
+            TitleBar(title = stringResource(id = R.string.laporan_rusak), detail = stringResource(R.string.semua), navigateToAllScreen = { navigateToAllScreen("report") })
             Spacer(modifier = Modifier.height(16.dp))
             when (reportCheck) {
-                is Response.Loading -> {}
+                is Response.Loading -> {
+                    BoxLoadingData()
+                }
+
                 is Response.Success -> {
                     val data = (reportCheck as Response.Success<List<ReportProblem>>).data
                     val filteredData = data?.filter { reportProblem ->
@@ -204,16 +221,7 @@ fun HomeContent(
                     reportCheckCount.value = filteredData?.size ?: 0
 
                     if (filteredData.isNullOrEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 16.dp, end = 16.dp)
-                                .fillMaxWidth()
-                                .height(130.dp)
-                                .background(Color.White, shape = RoundedCornerShape(9)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
-                        }
+                        BoxEmptyData()
                     }
 
                     LazyRow(
@@ -247,28 +255,24 @@ fun HomeContent(
                     }
                 }
 
-                is Response.Failure -> {}
+                is Response.Failure -> {
+                    BoxEmptyData()
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            TitleBar(title = "Pengecekan Harian", detail = "Semua", navigateToAllScreen = { navigateToAllScreen("daychecking") })
+            TitleBar(title = stringResource(id = R.string.pengecekan_harian), detail = stringResource(id = R.string.semua), navigateToAllScreen = { navigateToAllScreen("daychecking") })
             Spacer(modifier = Modifier.height(16.dp))
             when (dailyCheck) {
-                is Response.Loading -> {}
+                is Response.Loading -> {
+                    BoxLoadingData()
+                }
+
                 is Response.Success -> {
                     val data = (dailyCheck as Response.Success<List<Alat>>).data
                     dailyCheckCount.value = data?.size ?: 0
 
                     if (data.isNullOrEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 16.dp, end = 16.dp)
-                                .fillMaxWidth()
-                                .height(130.dp)
-                                .background(Color.White, shape = RoundedCornerShape(9)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
-                        }
+                        BoxEmptyData()
                     }
 
                     LazyRow(
@@ -287,14 +291,13 @@ fun HomeContent(
                                 navigateToDayChecking = {
                                     navigateToDayChecking(alat.id!!)
                                 },
-                                navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
+                                navigateToDetailAlat = { navigateToDetailAlat(alat.id!!) },
                                 modifier = Modifier
                                     .width(screenWidth)
                                     .padding(
                                         start = if (index == 0) 16.dp else 0.dp,
                                         end = 16.dp
                                     )
-                                    .height(140.dp)
                                     .clip(RoundedCornerShape(7))
                                     .background(Color.White)
                             )
@@ -302,14 +305,16 @@ fun HomeContent(
                     }
                 }
 
-                is Response.Failure -> {}
+                is Response.Failure -> {
+                    BoxEmptyData()
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            TitleBar(title = "Pemeliharaan Bulanan", detail = "Semua", navigateToAllScreen = {navigateToAllScreen("monthchecking")})
+            TitleBar(title = stringResource(id = R.string.pengecekan_bulanan), detail = stringResource(id = R.string.semua), navigateToAllScreen = { navigateToAllScreen("monthchecking") })
             Spacer(modifier = Modifier.height(16.dp))
             when (monthlyCheck) {
                 is Response.Loading -> {
-                    Log.d("Cek Bulanan", "Loading")
+                    BoxLoadingData()
                 }
 
                 is Response.Success -> {
@@ -317,16 +322,7 @@ fun HomeContent(
                     monthlyCheckCount.value = data?.size ?: 0
 
                     if (data.isNullOrEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 16.dp, end = 16.dp)
-                                .fillMaxWidth()
-                                .height(130.dp)
-                                .background(Color.White, shape = RoundedCornerShape(9)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
-                        }
+                        BoxEmptyData()
                     }
 
                     LazyRow(
@@ -345,14 +341,13 @@ fun HomeContent(
                                 navigateToMonthChecking = {
                                     navigateToMonthChecking(alat.id!!)
                                 },
-                                navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
+                                navigateToDetailAlat = { navigateToDetailAlat(alat.id!!) },
                                 modifier = Modifier
                                     .width(screenWidth)
                                     .padding(
                                         start = if (index == 0) 16.dp else 0.dp,
                                         end = 16.dp
                                     )
-                                    .height(140.dp)
                                     .clip(RoundedCornerShape(7))
                                     .background(Color.White)
                             )
@@ -361,30 +356,24 @@ fun HomeContent(
                 }
 
                 is Response.Failure -> {
-                    Log.d("Cek Bulanan", "Failure")
+                    BoxEmptyData()
                 }
 
             }
             Spacer(modifier = Modifier.height(16.dp))
-            TitleBar(title = "Kalibrasi Alat", detail = "Semua", navigateToAllScreen = {navigateToAllScreen("calibrationchecking")})
+            TitleBar(title = stringResource(id = R.string.kalibrasi_alat), detail = stringResource(id = R.string.semua), navigateToAllScreen = { navigateToAllScreen("calibrationchecking") })
             Spacer(modifier = Modifier.height(16.dp))
             when (calibrationCheck) {
-                is Response.Loading -> {}
+                is Response.Loading -> {
+                    BoxLoadingData()
+                }
+
                 is Response.Success -> {
                     val data = (calibrationCheck as Response.Success<List<Alat>>).data
                     calibrationCheckCount.value = data?.size ?: 0
 
                     if (data.isNullOrEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 16.dp, end = 16.dp)
-                                .fillMaxWidth()
-                                .height(130.dp)
-                                .background(Color.White, shape = RoundedCornerShape(9)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Tidak ada", color = Color.Black, fontSize = 16.sp)
-                        }
+                        BoxEmptyData()
                     }
 
                     LazyRow(
@@ -403,14 +392,13 @@ fun HomeContent(
                                 navigateToCalibrationChecking = {
                                     navigateToCalibrationChecking(alat.id!!)
                                 },
-                                navigateToDetailAlat = {navigateToDetailAlat(alat.id!!)},
+                                navigateToDetailAlat = { navigateToDetailAlat(alat.id!!) },
                                 modifier = Modifier
                                     .width(screenWidth)
                                     .padding(
                                         start = if (index == 0) 16.dp else 0.dp,
                                         end = 16.dp
                                     )
-                                    .height(140.dp)
                                     .clip(RoundedCornerShape(7))
                                     .background(Color.White)
                             )
@@ -419,7 +407,9 @@ fun HomeContent(
 
                 }
 
-                is Response.Failure -> {}
+                is Response.Failure -> {
+                    BoxEmptyData()
+                }
             }
             Spacer(modifier = Modifier.height(30.dp))
         }

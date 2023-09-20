@@ -36,9 +36,6 @@ class HomeViewModel @Inject constructor(
     private val _countItemAlat = MutableStateFlow(0)
     val countItemAlat: StateFlow<Int> = _countItemAlat
 
-    private val _barcodeResult = MutableStateFlow<Response<String>>(Response.Loading)
-    val barcodeResult: StateFlow<Response<String>> = _barcodeResult
-
     init {
         viewModelScope.launch {
             getUserDataStore()
@@ -50,7 +47,7 @@ class HomeViewModel @Inject constructor(
         _countItemAlat.value = repo.countItemAlat()
     }
 
-    private suspend fun getUserDataStore() {
+    suspend fun getUserDataStore() {
         _userDataStore.value = repo.getUserDataStore()
     }
 
@@ -95,16 +92,6 @@ class HomeViewModel @Inject constructor(
             }
         } catch (e: Exception) {
             _calibrationCheck.emit(Response.Failure(e))
-        }
-    }
-
-    suspend fun startScan() {
-        try {
-            repo.getBarcodeText().collectLatest {
-                _barcodeResult.emit(it)
-            }
-        } catch (e: Exception) {
-            _barcodeResult.emit(Response.Failure(e))
         }
     }
 

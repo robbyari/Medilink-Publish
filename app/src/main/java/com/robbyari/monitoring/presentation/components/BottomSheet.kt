@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.presentation.theme.Blue
@@ -64,8 +66,8 @@ fun BottomSheet(
         containerColor = Color.White,
     ) {
         Text(
-            text = "Laporkan Masalah",
-            fontSize = 20.sp,
+            text = stringResource(R.string.laporkan_masalah),
+            fontSize = 16.sp,
             color = Color.Black,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -82,7 +84,7 @@ fun BottomSheet(
             ) {
                 AsyncImage(
                     model = alat.photoUrl,
-                    contentDescription = "Photo Alat",
+                    contentDescription = stringResource(R.string.photo_alat),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(65.dp)
@@ -94,7 +96,6 @@ fun BottomSheet(
                         text = alat.noSeri!!,
                         fontSize = 16.sp,
                         color = Color.Black,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.width(200.dp)
                     )
@@ -102,7 +103,6 @@ fun BottomSheet(
                         text = alat.namaAlat!!,
                         fontSize = 16.sp,
                         color = Color.Black,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.width(280.dp)
@@ -111,7 +111,6 @@ fun BottomSheet(
                         text = alat.unit!!,
                         fontSize = 16.sp,
                         color = Color.Black,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.width(200.dp)
                     )
@@ -127,30 +126,27 @@ fun BottomSheet(
             ) {
                 Column(modifier = Modifier.weight(0.5f)) {
                     Text(
-                        text = "Pelapor : ",
+                        text = stringResource(R.string.pelapor),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = "${user.firstName } ${user.lastName}",
+                        text = "${user.name }",
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
-                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(end = 16.dp)
                     )
                 }
                 Column(modifier = Modifier.weight(0.5f)) {
                     Text(
-                        text = "Waktu pelaporan : ",
+                        text = stringResource(R.string.waktu_pelaporan),
                         fontSize = 16.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -158,7 +154,6 @@ fun BottomSheet(
                         fontSize = 16.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Start,
-                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(end = 16.dp)
                     )
@@ -167,7 +162,7 @@ fun BottomSheet(
             Spacer(modifier = Modifier.height(16.dp))
             Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                 Text(
-                    text = "Divisi : ",
+                    text = stringResource(R.string.divisi),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Start,
@@ -175,7 +170,7 @@ fun BottomSheet(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = user.divisi ?: "",
+                    text = user.role ?: "",
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Start,
@@ -200,7 +195,7 @@ fun BottomSheet(
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(30.dp))
                 } else {
                     Text(
-                        text = "Kirim",
+                        text = stringResource(R.string.kirim),
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,11 +29,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.User
 import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.utils.getGreeting
@@ -57,7 +59,6 @@ fun HomeActionBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(75.dp)
             .background(Color.White)
             .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.Start,
@@ -68,7 +69,7 @@ fun HomeActionBar(
                 is AsyncImagePainter.State.Error -> {
                     Icon(
                         Icons.Default.Person,
-                        contentDescription = "Photo Profil",
+                        contentDescription = stringResource(id = R.string.photo_profile),
                         tint = Color.White,
                         modifier = Modifier
                             .size(55.dp)
@@ -80,7 +81,7 @@ fun HomeActionBar(
                 is AsyncImagePainter.State.Loading -> {
                     Icon(
                         Icons.Default.Person,
-                        contentDescription = "Photo Profil",
+                        contentDescription = stringResource(id = R.string.photo_profile),
                         tint = Color.White,
                         modifier = Modifier
                             .shimmer()
@@ -93,7 +94,7 @@ fun HomeActionBar(
             }
             Image(
                 painter = painter,
-                contentDescription = "Photo Profil",
+                contentDescription = stringResource(id = R.string.photo_profile),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(55.dp)
@@ -113,16 +114,17 @@ fun HomeActionBar(
             )
             Text(
                 text = nameDataStore,
-                fontSize = 20.sp,
+                fontSize = 16.sp,
                 color = Color.Black,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.width(LocalConfiguration.current.screenWidthDp.dp * 0.5f)
             )
         }
         Spacer(modifier = Modifier.weight(1f))
         if (roleUser) {
             Icon(
                 Icons.Filled.QrCodeScanner,
-                contentDescription = "Scan Code",
+                contentDescription = stringResource(R.string.scan_code),
                 tint = Color.White,
                 modifier = Modifier
                     .size(48.dp)

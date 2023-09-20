@@ -2,7 +2,6 @@ package com.robbyari.monitoring.presentation.screen.user
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.HourglassFull
 import androidx.compose.material.icons.filled.Summarize
@@ -34,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,16 +42,17 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.ReportProblem
 import com.robbyari.monitoring.domain.model.Response
 import com.robbyari.monitoring.domain.model.User
+import com.robbyari.monitoring.presentation.components.BoxLoadingData
 import com.robbyari.monitoring.presentation.components.CardContent
 import com.robbyari.monitoring.presentation.components.HistoryContent
 import com.robbyari.monitoring.presentation.components.HomeActionBar
 import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.presentation.theme.LightBlue
 import com.robbyari.monitoring.utils.convertFirebaseTimestampToString
-import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -66,21 +66,21 @@ fun UserScreen(
         systemUiController.setSystemBarsColor(Color.White, darkIcons = true)
         systemUiController.setNavigationBarColor(Color.Black)
     }
+    val coroutineScope = rememberCoroutineScope()
 
     val userDataStore by viewModel.userDataStore.collectAsState()
-    val barcodeResult: Response<String> by viewModel.barcodeResult.collectAsState()
+    val barcodeResult by viewModel.barcodeResult.collectAsState()
 
     LaunchedEffect(barcodeResult) {
-        when (barcodeResult) {
-            is Response.Success -> {
-                val scannedValue = (barcodeResult as Response.Success<String>).data
-                if (scannedValue != null) {
-                    navigateToReportScreen(scannedValue)
-                }
-            }
-
-            else -> {}
+        if (barcodeResult.isNotEmpty()) {
+            navigateToReportScreen(barcodeResult)
+            viewModel.resetScanValue()
         }
+    }
+
+
+    LaunchedEffect(Unit) {
+        viewModel.getUserDataStore()
     }
 
     Column(
@@ -91,7 +91,13 @@ fun UserScreen(
     ) {
         UserContent(
             user = userDataStore,
-            navigateToAccountScreen = { navigateToAccountScreen(it) }
+            navigateToAccountScreen = { navigateToAccountScreen(it) },
+            onScanClicked = {
+                viewModel.resetScanValue()
+                coroutineScope.launch {
+                    viewModel.startScan()
+                }
+            }
         )
     }
 }
@@ -101,9 +107,9 @@ fun UserScreen(
 fun UserContent(
     user: User,
     navigateToAccountScreen: (String) -> Unit,
+    onScanClicked: () -> Unit,
     viewModel: UserViewModel = hiltViewModel()
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val reportProblem by viewModel.reportProblem.collectAsState()
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("emptybox.json"))
     val reportCount = remember { mutableStateOf(0) }
@@ -111,13 +117,11 @@ fun UserContent(
     val reportDoneCount = remember { mutableStateOf(0) }
 
     HomeActionBar(
-        nameDataStore = "${user.firstName} ${user.lastName}",
+        nameDataStore = "${user.name}",
         user = user,
         roleUser = true,
         onClickScan = {
-            coroutineScope.launch {
-                viewModel.startScan()
-            }
+            onScanClicked()
         },
         navigateToAccountScreen = { navigateToAccountScreen(user.uid!!) }
     )
@@ -139,7 +143,7 @@ fun UserContent(
                 item {
                     CardContent(
                         icon = Icons.Filled.HourglassFull,
-                        title = "Laporan Saya",
+                        title = stringResource(R.string.laporan_saya),
                         total = reportActiveCount.value,
                     )
                     Spacer(modifier = Modifier.width(16.dp))
@@ -147,7 +151,7 @@ fun UserContent(
                 item {
                     CardContent(
                         icon = Icons.Filled.Task,
-                        title = "Laporan Selesai",
+                        title = stringResource(R.string.laporan_selesai),
                         total = reportDoneCount.value,
                     )
                     Spacer(modifier = Modifier.width(16.dp))
@@ -155,7 +159,7 @@ fun UserContent(
                 item {
                     CardContent(
                         icon = Icons.Filled.Summarize,
-                        title = "Total Laporan",
+                        title = stringResource(R.string.total_laporan),
                         total = reportCount.value,
                     )
                     Spacer(modifier = Modifier.width(16.dp))
@@ -171,7 +175,7 @@ fun UserContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Histori",
+                    text = stringResource(R.string.histori),
                     fontSize = 16.sp,
                     color = Color.Black,
                     fontWeight = FontWeight.Bold
@@ -188,17 +192,11 @@ fun UserContent(
         when (reportProblem) {
             is Response.Loading -> {
                 items(5) {
-                    Box(
-                        Modifier
-                            .shimmer()
-                            .padding(start = 16.dp, end = 16.dp)
-                            .background(Color.Gray, shape = RoundedCornerShape(7))
-                            .height(130.dp)
-                            .fillMaxWidth()
-                    )
+                    BoxLoadingData()
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
+
             is Response.Success -> {
                 val data = (reportProblem as Response.Success<List<ReportProblem>>).data
 
@@ -250,7 +248,21 @@ fun UserContent(
                     }
                 }
             }
-            is Response.Failure -> {}
+
+            is Response.Failure -> {
+                item {
+                    LottieAnimation(
+                        composition = composition,
+                        restartOnPlay = true,
+                        iterations = LottieConstants.IterateForever,
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.Center,
+                        modifier = Modifier
+                            .padding(top = 80.dp)
+                            .size(300.dp)
+                    )
+                }
+            }
         }
         item {
             Spacer(modifier = Modifier.height(20.dp))

@@ -25,8 +25,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.robbyari.monitoring.R
 
 @Composable
 fun SearchBar(
@@ -67,7 +70,7 @@ fun SearchItem(
         leadingIcon = {
             Icon(
                 imageVector = Icons.Rounded.Search,
-                contentDescription = "Icon search",
+                contentDescription = stringResource(R.string.icon_search),
                 tint = Color.Black
             )
         },
@@ -81,14 +84,14 @@ fun SearchItem(
             unfocusedIndicatorColor = Color.Transparent
         ),
         placeholder = {
-            Text("Cari", color = Color.Black)
+            Text(stringResource(R.string.cari), color = Color.Black, fontSize = 16.sp)
         },
         trailingIcon = {
             if (trailingIcon) {
                 IconButton(onClick = trailingOnClick) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = "Icon cancel",
+                        contentDescription = stringResource(R.string.icon_cancel),
                         tint = Color.Black
                     )
                 }

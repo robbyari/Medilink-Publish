@@ -1,9 +1,9 @@
 package com.robbyari.monitoring.presentation.screen.login
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +48,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.robbyari.monitoring.R
 import com.robbyari.monitoring.data.MonitoringRepositoryImpl.Companion.KEY_ROLE
 import com.robbyari.monitoring.di.userDataStore
-import com.robbyari.monitoring.presentation.activity.useractivity.UserActivity
 import com.robbyari.monitoring.presentation.components.TextFieldWithIcons
 import com.robbyari.monitoring.presentation.theme.Blue
 import kotlinx.coroutines.flow.first
@@ -56,6 +56,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     navigateToHome: () -> Unit,
+    navigateToUser: () -> Unit,
+    navigateToRegister: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val systemUiController = rememberSystemUiController()
@@ -72,29 +74,29 @@ fun LoginScreen(
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     ) {
         Box(
             modifier = Modifier
-                .height(250.dp)
+                .height(270.dp)
                 .fillMaxWidth()
                 .background(Blue),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = Alignment.Center
         ) {
             Image(
                 painter = painterResource(id = R.drawable.loginbackground),
-                contentDescription = "Login Image",
+                contentDescription = stringResource(R.string.login_image_background),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Bottom,
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = "Selamat Datang",
-                    fontSize = 30.sp,
+                    text = stringResource(R.string.selamat_datang),
+                    fontSize = 20.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
@@ -102,20 +104,20 @@ fun LoginScreen(
                         .padding(start = 20.dp, end = 20.dp)
                 )
                 Text(
-                    text = "Lakukan pengecekan teliti, laporkan alat yang rusak, dan pastikan kelancaran operasional dengan pengelolaan yang efektif.",
+                    text = stringResource(R.string.welcome_description),
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, bottom = 40.dp, top = 20.dp)
+                        .padding(start = 20.dp, end = 20.dp, top = 10.dp)
                 )
             }
         }
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(50.dp))
         TextFieldWithIcons(
             icon = Icons.Outlined.Email,
-            label = "Email",
-            placeholder = "Masukkan Email",
+            label = stringResource(R.string.email_text),
+            placeholder = stringResource(R.string.masukkan_email),
             value = email,
             onValueChange = { newValue -> email = newValue },
             modifier = Modifier
@@ -125,8 +127,8 @@ fun LoginScreen(
         )
         TextFieldWithIcons(
             icon = Icons.Outlined.Key,
-            label = "Password",
-            placeholder = "Masukkan Password",
+            label = stringResource(R.string.password_text),
+            placeholder = stringResource(R.string.masukkan_password),
             value = password,
             onValueChange = { newValue -> password = newValue },
             isPasswordVisible = true,
@@ -141,19 +143,26 @@ fun LoginScreen(
             onClick = {
                 isLoading = true
                 if (email.isBlank() || password.isBlank()) {
-                    Toast.makeText(context, "Email dan password tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.email_dan_password_tidak_boleh_kosong), Toast.LENGTH_SHORT).show()
                     isLoading = false
                 } else {
                     coroutineScope.launch {
                         val isLoginSuccessful = viewModel.loginUser(email, password)
                         val dataStore: DataStore<Preferences> = context.userDataStore
                         val dataStoreValue = dataStore.data.first()
-                        val intent = Intent(context, UserActivity::class.java)
 
                         when {
-                            isLoginSuccessful && dataStoreValue[KEY_ROLE] == "Teknisi" -> {navigateToHome()}
-                            isLoginSuccessful && dataStoreValue[KEY_ROLE] == "User" -> {context.startActivity(intent)}
-                            else -> {Toast.makeText(context, "User tidak ditemukan", Toast.LENGTH_SHORT).show()}
+                            isLoginSuccessful && dataStoreValue[KEY_ROLE] == "Teknisi" -> {
+                                navigateToHome()
+                            }
+
+                            isLoginSuccessful && dataStoreValue[KEY_ROLE] == "User" -> {
+                                navigateToUser()
+                            }
+
+                            else -> {
+                                Toast.makeText(context, context.getString(R.string.user_tidak_ditemukan), Toast.LENGTH_SHORT).show()
+                            }
                         }
                         isLoading = false
                     }
@@ -171,10 +180,10 @@ fun LoginScreen(
                 CircularProgressIndicator(color = Color.White)
             } else {
                 Text(
-                    text = "Masuk",
+                    text = stringResource(id = R.string.masuk),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    fontSize = 16.sp
                 )
             }
         }
@@ -191,14 +200,17 @@ fun LoginScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Belum Punya Akun?",
+                    text = stringResource(R.string.belum_punya_akun),
+                    fontSize = 16.sp,
+                    color = Color.Black,
                     modifier = Modifier
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Daftar Sekarang",
+                    text = stringResource(R.string.daftar),
                     color = Blue,
-                    modifier = Modifier
+                    fontSize = 16.sp,
+                    modifier = Modifier.clickable { navigateToRegister() }
                 )
             }
         }

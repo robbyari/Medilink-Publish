@@ -20,6 +20,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.presentation.theme.MonitoringTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
@@ -38,9 +39,9 @@ class MainActivity : ComponentActivity() {
         if (areGranted) {
             locationRequired = true
             startLocationUpdates(locationCallback, fusedLocationClient)
-            Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.permission_granted), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.permission_denied), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -58,7 +59,7 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf(true)
                 }
 
-                val cityNameState = remember { mutableStateOf("Unknown") }
+                val cityNameState = remember { mutableStateOf(getString(R.string.unknown)) }
                 val context = LocalContext.current
                 fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
                 locationCallback = object : LocationCallback() {
@@ -81,22 +82,19 @@ class MainActivity : ComponentActivity() {
 
                                 cityNameState.value = fullAddress
 
-                                // Koordinat target
                                 val targetLatitude = -6.3147011
                                 val targetLongitude = 106.7912588
 
-                                val targetLocation = Location("Target")
+                                val targetLocation = Location(getString(R.string.target))
                                 targetLocation.latitude = targetLatitude
                                 targetLocation.longitude = targetLongitude
 
-                                // Mengukur jarak dalam meter
                                 val distance = lo.distanceTo(targetLocation)
 
-                                // Memeriksa apakah jarak lebih dari 100 meter
                                 isDistanceGreaterThan100Meters.value = distance > 300
                             }
                         } catch (e: Exception) {
-                            Toast.makeText(this@MainActivity, "No internet available", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@MainActivity, getString(R.string.no_internet_available), Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -111,7 +109,7 @@ class MainActivity : ComponentActivity() {
                     launcherMultiplePermissions.launch(permissions)
                 }
 
-                MainApp(location = cityNameState.value, isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters.value)
+                MainApp(isDistanceGreaterThan100Meters = isDistanceGreaterThan100Meters.value)
             }
         }
     }
@@ -144,9 +142,5 @@ class MainActivity : ComponentActivity() {
         super.onPause()
         locationCallback?.let { fusedLocationClient?.removeLocationUpdates(it) }
     }
-
-    /* override fun onBackPressed() {
-         moveTaskToBack(true)
-     }*/
 }
 

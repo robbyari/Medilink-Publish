@@ -6,6 +6,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,8 +27,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.ImagesearchRoller
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,12 +46,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,7 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.robbyari.monitoring.R
@@ -68,13 +75,13 @@ import com.robbyari.monitoring.presentation.theme.LightBlue
 import com.robbyari.monitoring.utils.convertStringToFirebaseTimestamp
 import com.robbyari.monitoring.utils.createImageFile
 import com.robbyari.monitoring.utils.generateTimestamp
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 import java.util.Objects
 
 @Composable
 fun RepairScreen(
     idReportProblem: String?,
-    location: String?,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
     viewModel: RepairViewModel = hiltViewModel()
@@ -116,10 +123,10 @@ fun RepairScreen(
         ActivityResultContracts.RequestPermission()
     ) {
         if (it) {
-            Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.permission_granted), Toast.LENGTH_SHORT).show()
             cameraLauncher.launch(uri)
         } else {
-            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.permission_denied), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -144,7 +151,9 @@ fun RepairScreen(
             .systemBarsPadding()
     ) {
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()).background(LightBlue)
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .background(LightBlue)
         ) {
             when (detail) {
                 is Response.Loading -> {}
@@ -152,20 +161,19 @@ fun RepairScreen(
                     val data = (detail as Response.Success).data
                     if (data != null) {
                         ActionBarDetail(
-                            title = "Perbaikan",
+                            title = stringResource(R.string.perbaikan),
                             navigateBack = navigateBack,
                             modifier = Modifier
                         )
-                        Spacer(modifier = Modifier.height(16.dp).fillMaxWidth().background(Color.White))
                         RepairContent(
                             item = data,
                             notes = notes,
                             capturedImageUri = capturedImageUri.path?.isNotEmpty() == true,
                             painter = rememberAsyncImagePainter(capturedImageUri),
                             onQueryChange = onQueryChange,
-                            repairedBy = "${userDataStore.firstName} ${userDataStore.lastName}",
+                            repairedBy = "${userDataStore.name}",
                             time = timestampString,
-                            location = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
+                            location = if (isDistanceGreaterThan100Meters) stringResource(id = R.string.diluar_jangkauan) else stringResource(id = R.string.rs_prikasih),
                             onClickPicture = {
                                 val permissionCheckResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
                                 if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
@@ -200,20 +208,20 @@ fun RepairScreen(
                             nameUser = data?.nameUser,
                             photoUser = data?.photoUser,
                             createdAt = data?.createdAt,
-                            divisi = data?.divisi,
+                            role = data?.role,
                             notesUser = data?.notesUser,
                             notesRepair = notes,
                             photoTeknisi = userDataStore.photoUrl,
                             photoRepair = photoUrl,
                             repairedAt = convertStringToFirebaseTimestamp(timestampString),
                             status = true,
-                            repairedBy = "${userDataStore.firstName} ${userDataStore.lastName}"
+                            repairedBy = "${userDataStore.name}"
                         )
                         viewModel.updateToReportProblem(checkingItem)
                     }
                 } else {
                     isLoading = false
-                    Toast.makeText(context, "Gambar tidak boleh kosong!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.gambar_tidak_boleh_kosong), Toast.LENGTH_SHORT).show()
                 }
             },
             enabled = !isLoading,
@@ -229,7 +237,7 @@ fun RepairScreen(
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(30.dp))
             } else {
                 Text(
-                    text = "Kirim",
+                    text = stringResource(id = R.string.kirim),
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -245,7 +253,7 @@ fun RepairScreen(
 fun RepairContent(
     item: ReportProblem,
     capturedImageUri: Boolean = false,
-    painter: Painter = painterResource(id = R.drawable.logoprikasih),
+    painter: Painter = painterResource(id = R.drawable.medilinklogo512),
     repairedBy: String,
     time: String,
     location: String,
@@ -253,19 +261,57 @@ fun RepairContent(
     onQueryChange: (String) -> Unit,
     onClickPicture: () -> Unit,
 ) {
+    val image = rememberAsyncImagePainter(item.photoUser)
+    val state = image.state
+    val transition by animateFloatAsState(
+        targetValue = if (state is AsyncImagePainter.State.Success) 1f else 0f, label = ""
+    )
+
     Column(modifier = Modifier) {
         Row(
-            modifier = Modifier.background(Color.White).padding(start = 16.dp, end = 16.dp),
+            modifier = Modifier
+                .background(Color.White)
+                .padding(start = 16.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = item.photoUser,
-                contentDescription = "Photo Alat",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(65.dp)
-                    .clip(RoundedCornerShape(11))
-            )
+            Box(modifier = Modifier) {
+                when (state) {
+                    is AsyncImagePainter.State.Error -> {
+                        Icon(
+                            Icons.Default.BrokenImage,
+                            contentDescription = stringResource(id = R.string.photo_alat),
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(65.dp)
+                                .background(color = Color.Gray, shape = RoundedCornerShape(11))
+                                .padding(8.dp)
+                        )
+                    }
+
+                    is AsyncImagePainter.State.Loading -> {
+                        Icon(
+                            Icons.Default.ImagesearchRoller,
+                            contentDescription = stringResource(id = R.string.photo_alat),
+                            tint = Color.White,
+                            modifier = Modifier
+                                .shimmer()
+                                .size(65.dp)
+                                .background(color = Color.Gray, shape = RoundedCornerShape(11))
+                                .padding(8.dp)
+                        )
+                    }
+                    else -> {}
+                }
+                Image(
+                    painter = image,
+                    contentDescription = stringResource(id = R.string.photo_alat),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(65.dp)
+                        .clip(RoundedCornerShape(11))
+                        .alpha(transition)
+                )
+            }
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
@@ -292,9 +338,12 @@ fun RepairContent(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(8.dp).fillMaxWidth().background(Color.White))
+        Spacer(modifier = Modifier
+            .height(8.dp)
+            .fillMaxWidth()
+            .background(Color.White))
         Text(
-            text = "Catatan: ",
+            text = stringResource(id = R.string.catatan),
             fontSize = 16.sp,
             color = Color.Gray,
             maxLines = 1,
@@ -314,7 +363,10 @@ fun RepairContent(
                 .background(Color.White)
                 .padding(start = 16.dp, end = 16.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp).fillMaxWidth().background(Color.White))
+        Spacer(modifier = Modifier
+            .height(8.dp)
+            .fillMaxWidth()
+            .background(Color.White))
         Divider(Modifier, 2.dp, color = Color.LightGray)
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -325,11 +377,10 @@ fun RepairContent(
                 .weight(0.5f)
                 .padding(end = 8.dp)) {
                 Text(
-                    text = "Petugas : ",
+                    text = stringResource(R.string.petugas),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Start,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
@@ -337,7 +388,6 @@ fun RepairContent(
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Start,
-                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
@@ -345,11 +395,10 @@ fun RepairContent(
                 .weight(0.5f)
                 .padding(start = 8.dp)) {
                 Text(
-                    text = "Waktu perbaikan : ",
+                    text = stringResource(R.string.waktu_perbaikan),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Start,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
@@ -357,18 +406,16 @@ fun RepairContent(
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Start,
-                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Lokasi : ",
+            text = stringResource(id = R.string.lokasi),
             fontSize = 16.sp,
             color = Color.Gray,
             textAlign = TextAlign.Start,
-            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .fillMaxWidth()
@@ -379,7 +426,6 @@ fun RepairContent(
             fontSize = 16.sp,
             color = Color.Black,
             textAlign = TextAlign.Start,
-            maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .fillMaxWidth()
@@ -411,11 +457,12 @@ fun RepairContent(
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.baseline_image),
-                                contentDescription = "Foto Bukti",
+                                contentDescription = stringResource(id = R.string.foto_bukti),
                                 modifier = Modifier.size(100.dp)
                             )
                             Text(
-                                text = "Upload",
+                                text = stringResource(id = R.string.upload),
+                                fontSize = 16.sp,
                                 color = Color.Gray,
                                 modifier = Modifier
                             )
@@ -423,7 +470,7 @@ fun RepairContent(
                         Image(
                             painter = painter,
                             contentScale = ContentScale.Fit,
-                            contentDescription = "Image from camera",
+                            contentDescription = stringResource(R.string.gambar_dari_kamera),
                             modifier = Modifier
                                 .height(160.dp)
                                 .width(120.dp)
@@ -432,11 +479,12 @@ fun RepairContent(
                 } else {
                     Image(
                         painter = painterResource(id = R.drawable.baseline_image),
-                        contentDescription = "Foto Bukti",
+                        contentDescription = stringResource(id = R.string.foto_bukti),
                         modifier = Modifier.size(100.dp)
                     )
                     Text(
-                        text = "Upload",
+                        text = stringResource(id = R.string.upload),
+                        fontSize = 16.sp,
                         color = Color.Gray,
                         modifier = Modifier
                     )

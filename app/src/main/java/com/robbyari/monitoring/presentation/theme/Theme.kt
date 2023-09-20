@@ -5,13 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
-private val DarkColorScheme = lightColorScheme(
-    primary = ButtonColor,
-    secondary = ButtonBackground,
-    tertiary = Orange,
-)
-
-private val LightColorScheme = lightColorScheme(
+private val lightColorScheme = lightColorScheme(
     primary = ButtonColor,
     secondary = ButtonBackground,
     tertiary = Orange,
@@ -23,9 +17,9 @@ fun MonitoringTheme(
     content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) {
-        DarkColorScheme
+        lightColorScheme
     } else {
-        LightColorScheme
+        lightColorScheme
     }
 
     MaterialTheme(

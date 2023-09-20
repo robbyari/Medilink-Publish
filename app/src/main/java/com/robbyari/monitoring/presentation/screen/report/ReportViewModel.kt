@@ -18,7 +18,6 @@ import javax.inject.Inject
 class ReportViewModel @Inject constructor(
     private val repo: MonitoringRepository
 ) : ViewModel() {
-
     private val _detailAlat = MutableStateFlow<Response<Alat>>(Response.Loading)
     val detailAlat: StateFlow<Response<Alat>> = _detailAlat
 

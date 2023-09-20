@@ -3,7 +3,6 @@ package com.robbyari.monitoring.presentation.screen.calibrationchecking
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,6 +53,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.Timestamp
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.domain.model.Alat
 import com.robbyari.monitoring.domain.model.Checking
 import com.robbyari.monitoring.domain.model.ReportProblem
@@ -76,7 +77,6 @@ import java.util.Objects
 @Composable
 fun CalibrationCheckingScreen(
     id: String?,
-    location: String?,
     isDistanceGreaterThan100Meters: Boolean,
     navigateBack: () -> Unit,
     viewModel: CalibrationCheckingViewModel = hiltViewModel()
@@ -131,10 +131,10 @@ fun CalibrationCheckingScreen(
         ActivityResultContracts.RequestPermission()
     ) {
         if (it) {
-            Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.permission_granted), Toast.LENGTH_SHORT).show()
             cameraLauncher.launch(uri)
         } else {
-            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.permission_denied), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -178,10 +178,10 @@ fun CalibrationCheckingScreen(
             noSeri = data.noSeri,
             unit = data.unit,
             idUser = userDataStore.uid,
-            nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
+            nameUser = "${userDataStore.name}",
             photoUser = userDataStore.photoUrl,
             createdAt = convertStringToFirebaseTimestamp(timestampString),
-            divisi = userDataStore.divisi,
+            role = userDataStore.role,
             notesUser = notesReport,
             notesRepair = "",
             photoTeknisi = "",
@@ -207,7 +207,7 @@ fun CalibrationCheckingScreen(
                         viewModel.addToReportProblem(timeStamp, reportProblem)
                     }
                 } else {
-                    Toast.makeText(context, "Catatan tidak boleh kosong!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.catatan_tidak_boleh_kosong), Toast.LENGTH_SHORT).show()
                 }
             }
         )
@@ -220,13 +220,12 @@ fun CalibrationCheckingScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(LightBlue),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(LightBlue),
     ) {
         when (detailState) {
-            is Response.Loading -> {
-                Log.d("Loading", "")
-            }
-
+            is Response.Loading -> {}
             is Response.Success -> {
                 val data = (detailState as Response.Success<Alat>).data
                 totalItemCount.value = data?.listCekKalibrasi?.size ?: 0
@@ -238,18 +237,18 @@ fun CalibrationCheckingScreen(
                             .systemBarsPadding()
                     ) {
                         ActionBarDetail(
-                            title = "Pengecekan Kalibrasi",
+                            title = stringResource(R.string.pengecekan_kalibrasi),
                             navigateBack = navigateBack,
                             modifier = Modifier
                         )
                         DetailHeaderContent(data = data, calibrationChecking = true)
                         BodyContentChecking(
                             time = timestampString,
-                            location = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
+                            location = if (isDistanceGreaterThan100Meters) stringResource(R.string.diluar_jangkauan) else stringResource(R.string.rs_prikasih),
                             capturedImageUri = capturedImageUri.path?.isNotEmpty() == true,
                             painter = rememberAsyncImagePainter(capturedImageUri),
                             listCek = data.listCekKalibrasi,
-                            nameUser = "${userDataStore.firstName} ${userDataStore.lastName}",
+                            nameUser = "${userDataStore.name}",
                             checkedItems = checkedItems,
                             checkedItemCount = checkedItemCount,
                             progressPercentage = progressPercentage,
@@ -271,10 +270,7 @@ fun CalibrationCheckingScreen(
                 }
             }
 
-            is Response.Failure -> {
-                Log.d("Failure", "")
-            }
-
+            is Response.Failure -> {}
         }
 
         Row(
@@ -299,7 +295,7 @@ fun CalibrationCheckingScreen(
             {
                 Icon(
                     imageVector = Icons.Default.ReportProblem,
-                    contentDescription = "Icon laporkan masalah",
+                    contentDescription = stringResource(id = R.string.laporkan_masalah),
                     tint = Color.White,
                     modifier = Modifier
                 )
@@ -324,9 +320,9 @@ fun CalibrationCheckingScreen(
                                 noSeri = data?.noSeri,
                                 namaAlat = data?.namaAlat,
                                 unit = data?.unit,
-                                petugasHariIni = "${userDataStore.firstName} ${userDataStore.lastName}",
+                                petugasHariIni = "${userDataStore.name}",
                                 waktuPegecekan = convertStringToFirebaseTimestamp(timestampString),
-                                lokasi = if (isDistanceGreaterThan100Meters) "Diluar Jangkauan" else "RS Prikasih",
+                                lokasi = if (isDistanceGreaterThan100Meters) context.getString(R.string.diluar_jangkauan) else context.getString(R.string.rs_prikasih),
                                 listCek = updatedListCek,
                                 photoUrl = photoUrl,
                                 progress = "$checkedItemCount/${totalItemCount.value} Selesai",
@@ -336,7 +332,7 @@ fun CalibrationCheckingScreen(
                         }
                     } else {
                         isLoading = false
-                        Toast.makeText(context, "Gambar tidak boleh kosong!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.gambar_tidak_boleh_kosong), Toast.LENGTH_SHORT).show()
                     }
                 },
                 enabled = !isLoading,
@@ -351,7 +347,7 @@ fun CalibrationCheckingScreen(
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(30.dp))
                 } else {
                     Text(
-                        text = "Kirim",
+                        text = stringResource(id = R.string.kirim),
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,

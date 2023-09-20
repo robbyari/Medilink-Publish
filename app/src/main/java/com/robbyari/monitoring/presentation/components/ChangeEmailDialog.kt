@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,12 +18,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.robbyari.monitoring.R
 import com.robbyari.monitoring.presentation.theme.Blue
 import com.robbyari.monitoring.presentation.theme.LightBlue
 
@@ -40,11 +41,11 @@ fun ChangeEmailDialog(
         onDismissRequest = close,
         confirmButton = {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Ganti Email",
+                    text = stringResource(R.string.ganti_email),
                     textAlign = TextAlign.Center,
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
@@ -52,7 +53,7 @@ fun ChangeEmailDialog(
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "Email sekarang :",
+                    text = stringResource(R.string.email_sekarang),
                     textAlign = TextAlign.Start,
                     color = Color.Gray,
                     fontSize = 16.sp,
@@ -69,7 +70,7 @@ fun ChangeEmailDialog(
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "Email baru :",
+                    text = stringResource(R.string.email_baru),
                     textAlign = TextAlign.Start,
                     color = Color.Gray,
                     fontSize = 16.sp,
@@ -85,7 +86,7 @@ fun ChangeEmailDialog(
                     ),
                     placeholder = {
                         Text(
-                            text = "Masukan email baru",
+                            text = stringResource(R.string.masukan_email_baru),
                             textAlign = TextAlign.Start,
                             color = Color.Gray,
                             fontSize = 16.sp,
@@ -105,7 +106,7 @@ fun ChangeEmailDialog(
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.Bottom
                 ) {
@@ -115,10 +116,10 @@ fun ChangeEmailDialog(
                         shape = RoundedCornerShape(25),
                         modifier = Modifier
                             .weight(1f)
-                            .height(50.dp)
+                            .height(52.dp)
                     ) {
                         Text(
-                            text = "Ganti",
+                            text = stringResource(R.string.ganti),
                             textAlign = TextAlign.Center,
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -130,7 +131,6 @@ fun ChangeEmailDialog(
             }
         },
         containerColor = Color.White,
-        modifier = Modifier
-            .height(330.dp)
+        modifier = Modifier.fillMaxWidth()
     )
 }

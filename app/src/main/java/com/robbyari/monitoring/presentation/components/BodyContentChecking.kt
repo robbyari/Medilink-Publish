@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,7 +48,7 @@ import com.robbyari.monitoring.presentation.theme.LightBlue
 fun BodyContentChecking(
     onClickCamera: () -> Unit,
     capturedImageUri: Boolean = false,
-    painter: Painter = painterResource(id = R.drawable.logoprikasih),
+    painter: Painter = painterResource(id = R.drawable.medilinklogo512),
     location: String? = "",
     time: String? = "",
     nameUser: String,
@@ -69,11 +70,10 @@ fun BodyContentChecking(
         Row(Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.weight(0.5f)) {
                 Text(
-                    text = "Petugas hari ini : ",
+                    text = stringResource(R.string.petugas_hari_ini),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Start,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
@@ -81,26 +81,23 @@ fun BodyContentChecking(
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Start,
-                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(end = 16.dp)
                 )
             }
             Column(modifier = Modifier.weight(0.5f)) {
                 Text(
-                    text = "Waktu pengecekan : ",
+                    text = stringResource(R.string.waktu_pengecekan),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Start,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = time ?: "Empty",
+                    text = time ?: stringResource(R.string.empty),
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Start,
-                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(end = 16.dp)
                 )
@@ -108,29 +105,26 @@ fun BodyContentChecking(
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Lokasi : ",
+            text = stringResource(R.string.lokasi),
             fontSize = 16.sp,
             color = Color.Gray,
             textAlign = TextAlign.Start,
-            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = location ?: "Empty",
+            text = location ?: stringResource(R.string.empty),
             fontSize = 16.sp,
             color = Color.Black,
             textAlign = TextAlign.Start,
-            maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(end = 16.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Pengecekan : ",
+            text = stringResource(R.string.pengecekan),
             fontSize = 16.sp,
             color = Color.Gray,
             textAlign = TextAlign.Start,
-            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         Spacer(modifier = Modifier.height(6.dp))
@@ -151,7 +145,7 @@ fun BodyContentChecking(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "$checkedItemCount/$totalItemCount Selesai",
+            text = stringResource(R.string.selesai, checkedItemCount, totalItemCount),
             fontSize = 16.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center,
@@ -182,11 +176,11 @@ fun BodyContentChecking(
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.baseline_image),
-                                contentDescription = "Foto Bukti",
+                                contentDescription = stringResource(R.string.foto_bukti),
                                 modifier = Modifier.size(100.dp)
                             )
                             Text(
-                                text = "Upload",
+                                text = stringResource(R.string.upload),
                                 color = Color.Gray,
                                 modifier = Modifier
                             )
@@ -194,7 +188,7 @@ fun BodyContentChecking(
                         Image(
                             painter = painter,
                             contentScale = ContentScale.Fit,
-                            contentDescription = "Image from camera",
+                            contentDescription = stringResource(R.string.image_from_camera),
                             modifier = Modifier
                                 .height(160.dp)
                                 .width(120.dp)
@@ -203,11 +197,11 @@ fun BodyContentChecking(
                 } else {
                     Image(
                         painter = painterResource(id = R.drawable.baseline_image),
-                        contentDescription = "Foto Bukti",
+                        contentDescription = stringResource(R.string.foto_bukti),
                         modifier = Modifier.size(100.dp)
                     )
                     Text(
-                        text = "Upload",
+                        text = stringResource(R.string.upload),
                         color = Color.Gray,
                         modifier = Modifier
                     )
@@ -233,7 +227,7 @@ fun TextFieldNote(
     TextField(
         value = notes,
         onValueChange = onQueryChange,
-        label = { Text("Catatan :") },
+        label = { Text(stringResource(R.string.catatan)) },
         colors = TextFieldDefaults.colors(
             focusedTextColor = Color.Black,
             unfocusedTextColor = Color.Gray,

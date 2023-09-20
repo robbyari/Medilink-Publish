@@ -30,6 +30,7 @@ class CalibrationCheckingViewModel @Inject constructor(
 
     private val _addToReportProblem = MutableStateFlow<Response<Boolean>>(Response.Loading)
     val addToReportProblem: StateFlow<Response<Boolean>> = _addToReportProblem
+
     init {
         viewModelScope.launch {
             getUserDataStore()
@@ -56,6 +57,7 @@ class CalibrationCheckingViewModel @Inject constructor(
             }
         }
     }
+
     suspend fun addToReportProblem(idDocument: String, item: ReportProblem) {
         viewModelScope.launch {
             try {
@@ -68,6 +70,7 @@ class CalibrationCheckingViewModel @Inject constructor(
             }
         }
     }
+
     suspend fun getDetail(id: String) {
         viewModelScope.launch {
             try {

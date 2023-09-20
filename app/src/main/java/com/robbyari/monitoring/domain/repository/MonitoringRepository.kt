@@ -14,9 +14,10 @@ interface MonitoringRepository {
     suspend fun getDailyCheck(): Flow<Response<List<Alat>>>
     suspend fun getMonthlyCheck(): Flow<Response<List<Alat>>>
     suspend fun getCalibrationCheck(): Flow<Response<List<Alat>>>
-    suspend fun getBarcodeText(): Flow<Response<String>>
+    suspend fun getBarcodeText(): String
     suspend fun getDetailAlat(id: String): Flow<Response<Alat>>
     suspend fun addImageToFirebaseStorage(imageUri: Uri): String
+    suspend fun addPhotoProfileToFirebaseStorage(imageUri: Uri, idUser: String): String
     suspend fun addToDayChecking(idDocument: String ,item: Checking): Flow<Response<Boolean>>
     suspend fun addToMonthChecking(idDocument: String ,item: Checking): Flow<Response<Boolean>>
     suspend fun addToCalibrationChecking(idDocument: String ,item: Checking): Flow<Response<Boolean>>
@@ -30,5 +31,8 @@ interface MonitoringRepository {
     suspend fun changeEmail(uid: String, emailUpdate: String): Boolean
     suspend fun getUserDatabase(uid: String): Flow<Response<User>>
     suspend fun changePassword(uid: String, passwordUpdate: String): Boolean
+    suspend fun changePhotoProfile(uid: String, urlUpdate: String): Boolean
     suspend fun resetDataStore() : Boolean
+    suspend fun registerUser(user: User): Boolean
+    suspend fun deleteAccount(id: String)
 }
